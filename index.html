@@ -47,7 +47,7 @@
           <strong id="overallPercent">0%</strong>
         </div>
         <div class="summary-counts">
-          <span><b id="completeCount">0</b> complete</span>
+          <span><b id="completeCount">0</b> fully complete</span>
           <span><b id="accountCount">0</b> accounts</span>
         </div>
       </div>
@@ -59,12 +59,41 @@
     <section id="completionHistoryCard" class="completion-history-card" hidden>
       <div class="completion-history-head">
         <div>
-          <span class="summary-label">Completed Accounts</span>
-          <strong id="completionHistoryCount">0</strong>
+          <span class="summary-label">Completion History</span>
+          <strong>Done</strong>
         </div>
         <button id="toggleHistoryBtn" class="text-btn" type="button">Show history</button>
       </div>
-      <div id="completionHistoryList" class="completion-history-list" hidden></div>
+
+      <div class="completion-tallies">
+        <div class="completion-tally">
+          <span class="tally-label">Perennial Cutbacks</span>
+          <strong id="perennialCompleteCount">0</strong>
+        </div>
+        <div class="completion-tally">
+          <span class="tally-label">Annual Pulls</span>
+          <strong id="annualCompleteCount">0</strong>
+        </div>
+        <div class="completion-tally full">
+          <span class="tally-label">Fully Complete</span>
+          <strong id="completionHistoryCount">0</strong>
+        </div>
+      </div>
+
+      <div id="completionHistoryList" class="completion-history-list" hidden>
+        <div class="history-section">
+          <h3>Perennial Cutbacks</h3>
+          <div id="perennialHistoryList"></div>
+        </div>
+        <div class="history-section">
+          <h3>Annual Pulls</h3>
+          <div id="annualHistoryList"></div>
+        </div>
+        <div class="history-section">
+          <h3>Fully Complete</h3>
+          <div id="fullHistoryList"></div>
+        </div>
+      </div>
     </section>
 
     <section class="controls">
