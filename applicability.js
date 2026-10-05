@@ -1,6 +1,6 @@
 const applicabilityStyles = document.createElement('link');
 applicabilityStyles.rel = 'stylesheet';
-applicabilityStyles.href = 'applicability.css?v=20261005-1454';
+applicabilityStyles.href = 'applicability.css?v=20261005-1502';
 document.head.appendChild(applicabilityStyles);
 
 state.editingAccountId = null;
@@ -120,6 +120,15 @@ async function saveTaskApplicability(accountId, selectedKeys) {
   return true;
 }
 
+async function markTaskNA(account, taskKey) {
+  const remaining = new Set(applicableTasks(account).map(task => task.key).filter(key => key !== taskKey));
+  if (!remaining.size) {
+    alert('This property needs at least one Fall Cutbacks task.');
+    return;
+  }
+  await saveTaskApplicability(account.id, remaining);
+}
+
 buildAccountCard = function(account) {
   const fragment = els.accountTemplate.content.cloneNode(true);
   const card = fragment.querySelector('.account-card');
@@ -136,7 +145,9 @@ buildAccountCard = function(account) {
     : `IN PROGRESS · ${tasks.length} ${tasks.length === 1 ? 'TASK' : 'TASKS'}`;
   fragment.querySelector('.mini-progress-fill').style.width = `${percent}%`;
 
-  fragment.querySelector('.edit-tasks-btn').addEventListener('click', () => openTaskDialog(account));
+  const manageButton = fragment.querySelector('.edit-tasks-btn');
+  manageButton.textContent = 'Manage tasks';
+  manageButton.addEventListener('click', () => openTaskDialog(account));
 
   fragment.querySelectorAll('.task-block').forEach(block => {
     const task = block.dataset.task;
@@ -147,6 +158,21 @@ buildAccountCard = function(account) {
 
     const value = Number(account[task] || 0);
     const date = account[`${task}CompletedAt`];
+    const labelRow = block.querySelector('.task-label-row');
+    const originalLabel = labelRow.querySelector('span');
+    const labelWrap = document.createElement('div');
+    labelWrap.className = 'task-name-actions';
+    originalLabel.replaceWith(labelWrap);
+    labelWrap.appendChild(originalLabel);
+
+    const naButton = document.createElement('button');
+    naButton.type = 'button';
+    naButton.className = 'task-na-btn';
+    naButton.textContent = 'N/A';
+    naButton.title = `Remove ${originalLabel.textContent} from this property`;
+    naButton.addEventListener('click', () => markTaskNA(account, task));
+    labelWrap.appendChild(naButton);
+
     block.querySelector('.task-percent').textContent = value === 100 && date
       ? `100% · ${formatDate(date)}`
       : `${value}%`;
