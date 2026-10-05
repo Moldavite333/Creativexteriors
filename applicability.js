@@ -1,3 +1,8 @@
+const applicabilityStyles = document.createElement('link');
+applicabilityStyles.rel = 'stylesheet';
+applicabilityStyles.href = 'applicability.css?v=20261005-1454';
+document.head.appendChild(applicabilityStyles);
+
 state.editingAccountId = null;
 
 Object.assign(els, {
