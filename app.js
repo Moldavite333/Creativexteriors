@@ -153,7 +153,6 @@ function render() {
 
   const hasAnyAccounts = state.accounts.length > 0;
   els.emptyState.hidden = hasAnyAccounts;
-  els.controls = undefined;
 
   if (hasAnyAccounts && accounts.length === 0) {
     els.accountsList.innerHTML = '<div class="empty-state"><h2>No matches</h2><p>Try a different search or filter.</p></div>';
