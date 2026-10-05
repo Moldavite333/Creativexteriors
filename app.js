@@ -1,12 +1,28 @@
-const STORAGE_KEY = 'creativexteriors-fall-cleanup-v1';
+const SUPABASE_URL = 'https://nsxbkfvmknjskjbgqogd.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_8xjscIHkKtesTauHl2S62w_AHaWCQUf';
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
 
 const state = {
-  accounts: loadAccounts(),
+  accounts: [],
+  workTypes: [],
   search: '',
-  filter: 'all'
+  filter: 'all',
+  session: null,
+  channel: null
 };
 
 const els = {
+  authScreen: document.getElementById('authScreen'),
+  authForm: document.getElementById('authForm'),
+  authEmail: document.getElementById('authEmail'),
+  authPassword: document.getElementById('authPassword'),
+  authMessage: document.getElementById('authMessage'),
+  signUpBtn: document.getElementById('signUpBtn'),
+  signOutBtn: document.getElementById('signOutBtn'),
+  appShell: document.getElementById('appShell'),
+  syncStatus: document.getElementById('syncStatus'),
   addAccountBtn: document.getElementById('addAccountBtn'),
   emptyAddBtn: document.getElementById('emptyAddBtn'),
   accountDialog: document.getElementById('accountDialog'),
@@ -24,17 +40,17 @@ const els = {
   filterSelect: document.getElementById('filterSelect')
 };
 
-function loadAccounts() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    return Array.isArray(saved) ? saved : [];
-  } catch {
-    return [];
-  }
+function companyEmail(email) {
+  return email.trim().toLowerCase().endsWith('@creativexteriors.com');
 }
 
-function saveAccounts() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.accounts));
+function setAuthMessage(message) {
+  els.authMessage.textContent = message || '';
+}
+
+function setSyncStatus(message, error = false) {
+  els.syncStatus.textContent = message;
+  els.syncStatus.classList.toggle('error', error);
 }
 
 function accountPercent(account) {
@@ -47,63 +63,124 @@ function isComplete(account) {
 
 function overallPercent() {
   if (!state.accounts.length) return 0;
-  const total = state.accounts.reduce((sum, account) => sum + accountPercent(account), 0);
-  return Math.round(total / state.accounts.length);
+  return Math.round(state.accounts.reduce((sum, account) => sum + accountPercent(account), 0) / state.accounts.length);
 }
 
-function openDialog() {
-  els.accountForm.reset();
-  els.accountDialog.showModal();
-  setTimeout(() => els.accountNameInput.focus(), 50);
+function taskKeyForWorkType(name) {
+  if (name === 'Perennial Cutbacks') return 'perennials';
+  if (name === 'Annual Pulls') return 'annuals';
+  return null;
 }
 
-function closeDialog() {
-  els.accountDialog.close();
+function workTypeIdForTask(task) {
+  const expected = task === 'perennials' ? 'Perennial Cutbacks' : 'Annual Pulls';
+  return state.workTypes.find(item => item.name === expected)?.id;
 }
 
-function addAccount(name) {
-  state.accounts.push({
-    id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
-    name: name.trim(),
-    perennials: 0,
-    annuals: 0,
-    createdAt: Date.now()
+async function loadData() {
+  setSyncStatus('Syncing…');
+  const [accountsResult, workTypesResult, progressResult] = await Promise.all([
+    client.from('accounts').select('id,name,created_at').order('name'),
+    client.from('work_types').select('id,name,sort_order').eq('active', true).order('sort_order'),
+    client.from('account_progress').select('account_id,work_type_id,progress')
+  ]);
+
+  const error = accountsResult.error || workTypesResult.error || progressResult.error;
+  if (error) {
+    console.error(error);
+    setSyncStatus('Sync error', true);
+    return;
+  }
+
+  state.workTypes = workTypesResult.data || [];
+  const progressMap = new Map();
+  for (const row of progressResult.data || []) {
+    progressMap.set(`${row.account_id}:${row.work_type_id}`, Number(row.progress));
+  }
+
+  state.accounts = (accountsResult.data || []).map(account => {
+    const assembled = { ...account, perennials: 0, annuals: 0 };
+    for (const wt of state.workTypes) {
+      const task = taskKeyForWorkType(wt.name);
+      if (task) assembled[task] = progressMap.get(`${account.id}:${wt.id}`) ?? 0;
+    }
+    return assembled;
   });
-  saveAccounts();
-  render();
-}
 
-function setProgress(accountId, task, value) {
-  const account = state.accounts.find(item => item.id === accountId);
-  if (!account || !['perennials', 'annuals'].includes(task)) return;
-  account[task] = Number(value);
-  saveAccounts();
   render();
-}
-
-function removeAccount(accountId) {
-  const account = state.accounts.find(item => item.id === accountId);
-  if (!account) return;
-  if (!confirm(`Remove ${account.name}?`)) return;
-  state.accounts = state.accounts.filter(item => item.id !== accountId);
-  saveAccounts();
-  render();
+  setSyncStatus('Live sync on');
 }
 
 function filteredAccounts() {
   const query = state.search.trim().toLowerCase();
   return [...state.accounts]
     .filter(account => !query || account.name.toLowerCase().includes(query))
-    .filter(account => {
-      if (state.filter === 'active') return !isComplete(account);
-      if (state.filter === 'complete') return isComplete(account);
-      return true;
-    })
+    .filter(account => state.filter === 'active' ? !isComplete(account) : state.filter === 'complete' ? isComplete(account) : true)
     .sort((a, b) => {
       const completeDifference = Number(isComplete(a)) - Number(isComplete(b));
       if (completeDifference !== 0) return completeDifference;
       return a.name.localeCompare(b.name);
     });
+}
+
+async function addAccount(name) {
+  setSyncStatus('Saving…');
+  const { data: account, error } = await client.from('accounts').insert({ name: name.trim() }).select('id,name,created_at').single();
+  if (error) {
+    alert(error.code === '23505' ? 'That account already exists.' : error.message);
+    setSyncStatus('Save failed', true);
+    return false;
+  }
+
+  const rows = state.workTypes.map(wt => ({ account_id: account.id, work_type_id: wt.id, progress: 0, updated_by: state.session.user.id }));
+  if (rows.length) {
+    const { error: progressError } = await client.from('account_progress').insert(rows);
+    if (progressError) {
+      console.error(progressError);
+      setSyncStatus('Partial save', true);
+    }
+  }
+  await loadData();
+  return true;
+}
+
+async function setProgress(accountId, task, value) {
+  const workTypeId = workTypeIdForTask(task);
+  if (!workTypeId) return;
+
+  const local = state.accounts.find(item => item.id === accountId);
+  if (local) {
+    local[task] = Number(value);
+    render();
+  }
+  setSyncStatus('Saving…');
+
+  const { error } = await client.from('account_progress').upsert({
+    account_id: accountId,
+    work_type_id: workTypeId,
+    progress: Number(value),
+    updated_at: new Date().toISOString(),
+    updated_by: state.session.user.id
+  }, { onConflict: 'account_id,work_type_id' });
+
+  if (error) {
+    console.error(error);
+    setSyncStatus('Save failed', true);
+    await loadData();
+    return;
+  }
+  setSyncStatus('Live sync on');
+}
+
+async function removeAccount(accountId) {
+  const account = state.accounts.find(item => item.id === accountId);
+  if (!account || !confirm(`Remove ${account.name}?`)) return;
+  const { error } = await client.from('accounts').delete().eq('id', accountId);
+  if (error) {
+    alert(error.message);
+    return;
+  }
+  await loadData();
 }
 
 function buildAccountCard(account) {
@@ -137,10 +214,9 @@ function buildAccountCard(account) {
 
 function renderSummary() {
   const percent = overallPercent();
-  const complete = state.accounts.filter(isComplete).length;
   els.overallPercent.textContent = `${percent}%`;
   els.overallBar.style.width = `${percent}%`;
-  els.completeCount.textContent = complete;
+  els.completeCount.textContent = state.accounts.filter(isComplete).length;
   els.accountCount.textContent = state.accounts.length;
 }
 
@@ -148,37 +224,92 @@ function render() {
   renderSummary();
   const accounts = filteredAccounts();
   els.accountsList.innerHTML = '';
-
   accounts.forEach(account => els.accountsList.appendChild(buildAccountCard(account)));
-
-  const hasAnyAccounts = state.accounts.length > 0;
-  els.emptyState.hidden = hasAnyAccounts;
-
-  if (hasAnyAccounts && accounts.length === 0) {
+  els.emptyState.hidden = state.accounts.length > 0;
+  if (state.accounts.length > 0 && accounts.length === 0) {
     els.accountsList.innerHTML = '<div class="empty-state"><h2>No matches</h2><p>Try a different search or filter.</p></div>';
   }
 }
 
+function openDialog() {
+  els.accountForm.reset();
+  els.accountDialog.showModal();
+  setTimeout(() => els.accountNameInput.focus(), 50);
+}
+
+function closeDialog() {
+  els.accountDialog.close();
+}
+
+function subscribeRealtime() {
+  if (state.channel) client.removeChannel(state.channel);
+  state.channel = client.channel('fall-cleanup-live')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'accounts' }, loadData)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'account_progress' }, loadData)
+    .subscribe(status => {
+      if (status === 'SUBSCRIBED') setSyncStatus('Live sync on');
+    });
+}
+
+async function showApp(session) {
+  state.session = session;
+  els.authScreen.hidden = true;
+  els.appShell.hidden = false;
+  await loadData();
+  subscribeRealtime();
+}
+
+function showAuth() {
+  state.session = null;
+  els.appShell.hidden = true;
+  els.authScreen.hidden = false;
+  if (state.channel) client.removeChannel(state.channel);
+}
+
+els.authForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  const email = els.authEmail.value.trim();
+  const password = els.authPassword.value;
+  if (!companyEmail(email)) return setAuthMessage('Use your @creativexteriors.com work email.');
+  setAuthMessage('Signing in…');
+  const { error } = await client.auth.signInWithPassword({ email, password });
+  setAuthMessage(error ? error.message : '');
+});
+
+els.signUpBtn.addEventListener('click', async () => {
+  const email = els.authEmail.value.trim();
+  const password = els.authPassword.value;
+  if (!companyEmail(email)) return setAuthMessage('Use your @creativexteriors.com work email.');
+  if (password.length < 6) return setAuthMessage('Use a password with at least 6 characters.');
+  setAuthMessage('Creating account…');
+  const { data, error } = await client.auth.signUp({ email, password });
+  if (error) return setAuthMessage(error.message);
+  setAuthMessage(data.session ? 'Account created.' : 'Account created. Check your work email to confirm it, then sign in.');
+});
+
+els.signOutBtn.addEventListener('click', async () => {
+  await client.auth.signOut();
+});
 els.addAccountBtn.addEventListener('click', openDialog);
 els.emptyAddBtn.addEventListener('click', openDialog);
 els.closeDialogBtn.addEventListener('click', closeDialog);
-els.accountDialog.addEventListener('click', event => {
-  if (event.target === els.accountDialog) closeDialog();
-});
-els.accountForm.addEventListener('submit', event => {
+els.accountDialog.addEventListener('click', event => { if (event.target === els.accountDialog) closeDialog(); });
+els.accountForm.addEventListener('submit', async event => {
   event.preventDefault();
   const name = els.accountNameInput.value.trim();
   if (!name) return;
-  addAccount(name);
-  closeDialog();
+  if (await addAccount(name)) closeDialog();
 });
-els.searchInput.addEventListener('input', event => {
-  state.search = event.target.value;
-  render();
-});
-els.filterSelect.addEventListener('change', event => {
-  state.filter = event.target.value;
-  render();
+els.searchInput.addEventListener('input', event => { state.search = event.target.value; render(); });
+els.filterSelect.addEventListener('change', event => { state.filter = event.target.value; render(); });
+
+client.auth.onAuthStateChange((_event, session) => {
+  if (session) showApp(session);
+  else showAuth();
 });
 
-render();
+(async function init() {
+  const { data: { session } } = await client.auth.getSession();
+  if (session) showApp(session);
+  else showAuth();
+})();
