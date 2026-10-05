@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#16261f" />
   <title>Creativexteriors | Operations</title>
-  <link rel="stylesheet" href="styles.css?v=20261005-1448" />
+  <link rel="stylesheet" href="styles.css?v=20261005-1452" />
 </head>
 <body>
   <section id="authScreen" class="auth-screen">
@@ -13,31 +13,17 @@
       <p class="eyebrow">CREATIVEXTERIORS</p>
       <h1>Operations</h1>
       <p class="auth-copy">Sign in with your Creativexteriors work email. Your updates will be shared with the team.</p>
-      <label>Email
-        <input id="authEmail" type="email" autocomplete="email" placeholder="name@creativexteriors.com" required />
-      </label>
-      <label>Password
-        <input id="authPassword" type="password" autocomplete="current-password" minlength="6" required />
-      </label>
-      <div class="auth-actions">
-        <button class="primary-btn wide" type="submit">Sign In</button>
-        <button id="signUpBtn" class="secondary-btn wide" type="button">Create Account</button>
-      </div>
+      <label>Email<input id="authEmail" type="email" autocomplete="email" placeholder="name@creativexteriors.com" required /></label>
+      <label>Password<input id="authPassword" type="password" autocomplete="current-password" minlength="6" required /></label>
+      <div class="auth-actions"><button class="primary-btn wide" type="submit">Sign In</button><button id="signUpBtn" class="secondary-btn wide" type="button">Create Account</button></div>
       <p id="authMessage" class="auth-message" role="status"></p>
     </form>
   </section>
 
   <main id="appShell" class="app-shell" hidden>
     <header class="topbar">
-      <div>
-        <p class="eyebrow">CREATIVEXTERIORS</p>
-        <h1>Operations</h1>
-        <span id="syncStatus" class="sync-status">Connecting…</span>
-      </div>
-      <div class="top-actions">
-        <button id="signOutBtn" class="text-btn" type="button">Sign out</button>
-        <button id="addAccountBtn" class="primary-btn" type="button">+ Account</button>
-      </div>
+      <div><p class="eyebrow">CREATIVEXTERIORS</p><h1>Operations</h1><span id="syncStatus" class="sync-status">Connecting…</span></div>
+      <div class="top-actions"><button id="signOutBtn" class="text-btn" type="button">Sign out</button><button id="addAccountBtn" class="primary-btn" type="button">+ Account</button></div>
     </header>
 
     <nav class="module-tabs" aria-label="Operations modules">
@@ -49,23 +35,13 @@
     </nav>
 
     <section id="fall-cutbacks" class="module-panel active" data-panel="fall-cutbacks">
-      <div class="module-heading">
-        <div><p class="eyebrow">SEASONAL OPERATIONS</p><h2>Fall Cutbacks</h2></div>
-      </div>
-
+      <div class="module-heading"><div><p class="eyebrow">SEASONAL OPERATIONS</p><h2>Fall Cutbacks</h2></div></div>
       <section class="summary-card" aria-label="Fall cutback progress">
-        <div class="summary-row">
-          <div><span class="summary-label">Overall Progress</span><strong id="overallPercent">0%</strong></div>
-          <div class="summary-counts"><span><b id="completeCount">0</b> fully complete</span><span><b id="accountCount">0</b> accounts</span></div>
-        </div>
+        <div class="summary-row"><div><span class="summary-label">Overall Progress</span><strong id="overallPercent">0%</strong></div><div class="summary-counts"><span><b id="completeCount">0</b> fully complete</span><span><b id="accountCount">0</b> accounts</span></div></div>
         <div class="progress-track" aria-hidden="true"><div id="overallBar" class="progress-fill" style="width:0%"></div></div>
       </section>
-
       <section id="completionHistoryCard" class="completion-history-card" hidden>
-        <div class="completion-history-head">
-          <div><span class="summary-label">Completion History</span><strong>Done</strong></div>
-          <button id="toggleHistoryBtn" class="text-btn" type="button">Show history</button>
-        </div>
+        <div class="completion-history-head"><div><span class="summary-label">Completion History</span><strong>Done</strong></div><button id="toggleHistoryBtn" class="text-btn" type="button">Show history</button></div>
         <div class="completion-tallies">
           <div class="completion-tally"><span class="tally-label">Perennials</span><strong id="perennialCompleteCount">0</strong></div>
           <div class="completion-tally"><span class="tally-label">Annuals</span><strong id="annualCompleteCount">0</strong></div>
@@ -79,16 +55,8 @@
           <div class="history-section"><h3>Fully Complete</h3><div id="fullHistoryList"></div></div>
         </div>
       </section>
-
-      <section class="controls">
-        <input id="searchInput" type="search" placeholder="Search accounts…" autocomplete="off" />
-        <select id="filterSelect" aria-label="Filter accounts"><option value="all">All</option><option value="active">Active</option><option value="complete">Complete</option></select>
-      </section>
-
-      <section id="emptyState" class="empty-state">
-        <h2>No accounts yet</h2><p>Add the first property and start tracking fall cutbacks.</p>
-        <button id="emptyAddBtn" class="primary-btn" type="button">Add Account</button>
-      </section>
+      <section class="controls"><input id="searchInput" type="search" placeholder="Search accounts…" autocomplete="off" /><select id="filterSelect" aria-label="Filter accounts"><option value="all">All</option><option value="active">Active</option><option value="complete">Complete</option></select></section>
+      <section id="emptyState" class="empty-state"><h2>No accounts yet</h2><p>Add the first property and start tracking fall cutbacks.</p><button id="emptyAddBtn" class="primary-btn" type="button">Add Account</button></section>
       <section id="accountsList" class="accounts-list" aria-live="polite"></section>
     </section>
 
@@ -98,20 +66,11 @@
     <section class="module-panel" data-panel="misc-crew"><div class="coming-soon"><p class="eyebrow">MODULE</p><h2>Misc. Crew</h2><p>Ready to build when you are.</p></div></section>
   </main>
 
-  <dialog id="accountDialog">
-    <form id="accountForm" method="dialog" class="dialog-card">
-      <div class="dialog-heading"><div><p class="eyebrow">NEW PROPERTY</p><h2>Add Account</h2></div><button id="closeDialogBtn" class="icon-btn" type="button" aria-label="Close">×</button></div>
-      <label>Account name<input id="accountNameInput" name="accountName" type="text" placeholder="e.g. Cherry Creek Plaza" required maxlength="80" /></label>
-      <button class="primary-btn wide" type="submit">Add Account</button>
-    </form>
-  </dialog>
+  <dialog id="accountDialog"><form id="accountForm" method="dialog" class="dialog-card"><div class="dialog-heading"><div><p class="eyebrow">NEW PROPERTY</p><h2>Add Account</h2></div><button id="closeDialogBtn" class="icon-btn" type="button" aria-label="Close">×</button></div><label>Account name<input id="accountNameInput" name="accountName" type="text" placeholder="e.g. Cherry Creek Plaza" required maxlength="80" /></label><button class="primary-btn wide" type="submit">Add Account</button></form></dialog>
 
   <dialog id="taskDialog">
     <form id="taskForm" class="dialog-card">
-      <div class="dialog-heading">
-        <div><p class="eyebrow">PROPERTY SETUP</p><h2 id="taskDialogTitle">Edit tasks</h2></div>
-        <button id="closeTaskDialogBtn" class="icon-btn" type="button" aria-label="Close">×</button>
-      </div>
+      <div class="dialog-heading"><div><p class="eyebrow">PROPERTY SETUP</p><h2 id="taskDialogTitle">Edit tasks</h2></div><button id="closeTaskDialogBtn" class="icon-btn" type="button" aria-label="Close">×</button></div>
       <p class="dialog-copy">Uncheck anything this property does not have. N/A tasks will not count against completion.</p>
       <div class="task-checkboxes">
         <label><input id="taskPerennials" type="checkbox" value="perennials" /> <span>Perennials</span></label>
@@ -125,10 +84,7 @@
 
   <template id="accountTemplate">
     <article class="account-card">
-      <div class="account-head">
-        <div><h2 class="account-name"></h2><span class="account-status"></span></div>
-        <div class="account-head-actions"><div class="account-percent">0%</div><button type="button" class="edit-tasks-btn">Edit tasks</button></div>
-      </div>
+      <div class="account-head"><div><h2 class="account-name"></h2><span class="account-status"></span></div><div class="account-head-actions"><div class="account-percent">0%</div><button type="button" class="edit-tasks-btn">Edit tasks</button></div></div>
       <div class="mini-progress"><div class="mini-progress-fill"></div></div>
       <div class="task-block" data-task="perennials"><div class="task-label-row"><span>Perennials</span><strong class="task-percent">0%</strong></div><div class="progress-buttons" role="group" aria-label="Perennial cutbacks progress"><button type="button" data-value="0">0</button><button type="button" data-value="25">25</button><button type="button" data-value="50">50</button><button type="button" data-value="100">100</button></div></div>
       <div class="task-block" data-task="annuals"><div class="task-label-row"><span>Annuals</span><strong class="task-percent">0%</strong></div><div class="progress-buttons" role="group" aria-label="Annual pulls progress"><button type="button" data-value="0">0</button><button type="button" data-value="25">25</button><button type="button" data-value="50">50</button><button type="button" data-value="100">100</button></div></div>
@@ -139,5 +95,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
   <script src="app.js?v=20261005-1448"></script>
+  <script src="applicability.js?v=20261005-1452"></script>
 </body>
 </html>
