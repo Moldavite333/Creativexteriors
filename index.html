@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#16261f" />
+  <title>Creativexteriors | Fall Cleanup</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">CREATIVEXTERIORS</p>
+        <h1>Fall Cleanup</h1>
+      </div>
+      <button id="addAccountBtn" class="primary-btn" type="button">+ Account</button>
+    </header>
+
+    <section class="summary-card" aria-label="Overall progress">
+      <div class="summary-row">
+        <div>
+          <span class="summary-label">Overall Progress</span>
+          <strong id="overallPercent">0%</strong>
+        </div>
+        <div class="summary-counts">
+          <span><b id="completeCount">0</b> complete</span>
+          <span><b id="accountCount">0</b> accounts</span>
+        </div>
+      </div>
+      <div class="progress-track" aria-hidden="true">
+        <div id="overallBar" class="progress-fill" style="width:0%"></div>
+      </div>
+    </section>
+
+    <section class="controls">
+      <input id="searchInput" type="search" placeholder="Search accounts…" autocomplete="off" />
+      <select id="filterSelect" aria-label="Filter accounts">
+        <option value="all">All</option>
+        <option value="active">Active</option>
+        <option value="complete">Complete</option>
+      </select>
+    </section>
+
+    <section id="emptyState" class="empty-state">
+      <h2>No accounts yet</h2>
+      <p>Add the first property and start tracking perennial cutbacks and annual pulls.</p>
+      <button id="emptyAddBtn" class="primary-btn" type="button">Add Account</button>
+    </section>
+
+    <section id="accountsList" class="accounts-list" aria-live="polite"></section>
+  </main>
+
+  <dialog id="accountDialog">
+    <form id="accountForm" method="dialog" class="dialog-card">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">NEW PROPERTY</p>
+          <h2>Add Account</h2>
+        </div>
+        <button id="closeDialogBtn" class="icon-btn" type="button" aria-label="Close">×</button>
+      </div>
+      <label>
+        Account name
+        <input id="accountNameInput" name="accountName" type="text" placeholder="e.g. Cherry Creek Plaza" required maxlength="80" />
+      </label>
+      <button class="primary-btn wide" type="submit">Add Account</button>
+    </form>
+  </dialog>
+
+  <template id="accountTemplate">
+    <article class="account-card">
+      <div class="account-head">
+        <div>
+          <h2 class="account-name"></h2>
+          <span class="account-status"></span>
+        </div>
+        <div class="account-percent">0%</div>
+      </div>
+
+      <div class="mini-progress"><div class="mini-progress-fill"></div></div>
+
+      <div class="task-block" data-task="perennials">
+        <div class="task-label-row">
+          <span>Perennial Cutbacks</span>
+          <strong class="task-percent">0%</strong>
+        </div>
+        <div class="progress-buttons" role="group" aria-label="Perennial Cutbacks progress">
+          <button type="button" data-value="0">0</button>
+          <button type="button" data-value="25">25</button>
+          <button type="button" data-value="50">50</button>
+          <button type="button" data-value="100">100</button>
+        </div>
+      </div>
+
+      <div class="task-block" data-task="annuals">
+        <div class="task-label-row">
+          <span>Annual Pulls</span>
+          <strong class="task-percent">0%</strong>
+        </div>
+        <div class="progress-buttons" role="group" aria-label="Annual Pulls progress">
+          <button type="button" data-value="0">0</button>
+          <button type="button" data-value="25">25</button>
+          <button type="button" data-value="50">50</button>
+          <button type="button" data-value="100">100</button>
+        </div>
+      </div>
+
+      <button type="button" class="delete-btn">Remove account</button>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
