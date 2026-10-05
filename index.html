@@ -56,6 +56,17 @@
       </div>
     </section>
 
+    <section id="completionHistoryCard" class="completion-history-card" hidden>
+      <div class="completion-history-head">
+        <div>
+          <span class="summary-label">Completed Accounts</span>
+          <strong id="completionHistoryCount">0</strong>
+        </div>
+        <button id="toggleHistoryBtn" class="text-btn" type="button">Show history</button>
+      </div>
+      <div id="completionHistoryList" class="completion-history-list" hidden></div>
+    </section>
+
     <section class="controls">
       <input id="searchInput" type="search" placeholder="Search accounts…" autocomplete="off" />
       <select id="filterSelect" aria-label="Filter accounts">
