@@ -1,6 +1,6 @@
 const irrigationStyles = document.createElement('link');
 irrigationStyles.rel = 'stylesheet';
-irrigationStyles.href = 'irrigation.css?v=20261007-light01';
+irrigationStyles.href = 'irrigation.css?v=20261007-orange01';
 document.head.appendChild(irrigationStyles);
 
 state.irrigationSearch = '';
