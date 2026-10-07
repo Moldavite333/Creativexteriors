@@ -1,0 +1,54 @@
+.pruning-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:12px}
+.pruning-summary-cell{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px}
+.pruning-summary-cell span{display:block;color:var(--muted);font-size:.7rem;font-weight:850;text-transform:uppercase;letter-spacing:.05em}
+.pruning-summary-cell strong{display:block;margin-top:4px;font-size:1.55rem;line-height:1}
+.pruning-summary-cell strong.over{color:var(--red)}
+.pruning-controls{grid-template-columns:1fr auto}
+.pruning-accounts-list{display:grid;gap:12px}
+.pruning-account-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:var(--shadow)}
+.pruning-account-card.over-budget{border-left:5px solid var(--red)}
+.pruning-account-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.pruning-account-head h3{margin:0 0 4px;font-size:1.08rem}
+.pruning-status{color:var(--muted);font-size:.74rem;font-weight:850;letter-spacing:.03em}
+.pruning-card-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.pruning-card-actions button{padding:8px 10px;font-size:.72rem}
+.pruning-hour-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}
+.pruning-hour-summary>div{background:#f7f7f7;border:1px solid #e0e0e0;border-radius:11px;padding:10px}
+.pruning-hour-summary span,.pruning-hour-summary small{display:block;color:var(--muted);font-size:.67rem;font-weight:800}
+.pruning-hour-summary strong{display:block;margin:3px 0;font-size:1.25rem}
+.pruning-hour-summary .over strong{color:var(--red)}
+.pruning-progress{margin:11px 0 13px}
+.pruning-ledger{border-top:1px solid var(--line);padding-top:11px}
+.pruning-ledger-label{font-size:.65rem;font-weight:900;letter-spacing:.08em;color:var(--accent);margin-bottom:6px}
+.pruning-ledger-row{display:grid;grid-template-columns:minmax(180px,1fr) repeat(3,78px) 24px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid #ececec}
+.pruning-ledger-row:last-child{border-bottom:0}
+.pruning-ledger-main strong,.pruning-ledger-main span{display:block}
+.pruning-ledger-main strong{font-size:.85rem}
+.pruning-ledger-main span{color:var(--muted);font-size:.69rem;margin-top:2px}
+.pruning-ledger-main p{margin:4px 0 0;color:var(--muted);font-size:.72rem;line-height:1.35}
+.pruning-ledger-number{text-align:right}
+.pruning-ledger-number span{display:block;color:var(--muted);font-size:.61rem;font-weight:850;text-transform:uppercase}
+.pruning-ledger-number strong{font-size:.9rem}
+.pruning-ledger-number.over strong{color:var(--red)}
+.pruning-delete-visit{border:0;background:transparent;color:#999;font-size:1.2rem;padding:2px}
+.pruning-delete-visit:hover{color:var(--red)}
+.pruning-dialog{width:min(620px,calc(100% - 18px))}
+.pruning-dialog-card{max-height:90vh;overflow:auto}
+.pruning-dialog-card textarea{width:100%;border:1px solid var(--line);background:#fff;color:#111;border-radius:10px;padding:11px 12px;resize:vertical}
+.pruning-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pruning-contract-total{background:var(--accent-soft);border:1px solid #ffc9ad;border-radius:10px;padding:10px 12px;margin:2px 0 12px;font-size:.82rem}
+.pruning-contract-total strong{font-size:1rem}
+@media(max-width:700px){
+  .pruning-summary{grid-template-columns:1fr 1fr}
+  .pruning-account-head{flex-direction:column}
+  .pruning-card-actions{width:100%;justify-content:stretch}
+  .pruning-card-actions button{flex:1}
+  .pruning-hour-summary{grid-template-columns:1fr}
+  .pruning-ledger-row{grid-template-columns:1fr repeat(3,55px) 20px;gap:5px}
+  .pruning-ledger-number strong{font-size:.82rem}
+}
+@media(max-width:480px){
+  .pruning-ledger-row{grid-template-columns:1fr repeat(3,48px) 18px}
+  .pruning-ledger-main strong{font-size:.8rem}
+  .pruning-form-grid{grid-template-columns:1fr}
+}
