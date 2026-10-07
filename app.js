@@ -11,7 +11,7 @@ const TASKS = [
 ];
 
 const state = {
-  accounts: [], workTypes: [], fertilizationApplications: [], aerationRounds: [], search: '', filter: 'all', session: null,
+  accounts: [], workTypes: [], fertilizationApplications: [], aerationRounds: [], pruningContracts: [], pruningVisits: [], search: '', filter: 'all', session: null,
   channel: null, historyOpen: false, activeTab: 'fall-cutbacks'
 };
 
@@ -50,18 +50,22 @@ function overallPercent(){ return state.accounts.length ? Math.round(state.accou
 
 async function loadData(){
   setSyncStatus('Syncing…');
-  const [accountsResult,workTypesResult,progressResult,fertilizationResult,aerationResult]=await Promise.all([
+  const [accountsResult,workTypesResult,progressResult,fertilizationResult,aerationResult,pruningContractsResult,pruningVisitsResult]=await Promise.all([
     client.from('accounts').select('id,name,created_at,completed_at').order('name'),
     client.from('work_types').select('id,name,sort_order').eq('active',true).order('sort_order'),
     client.from('account_progress').select('account_id,work_type_id,progress,completed_at'),
     client.from('fertilization_applications').select('id,account_id,application_number,completed,completed_at,updated_at,updated_by'),
-    client.from('aeration_rounds').select('id,account_id,round_number,completed,completed_at,updated_at,updated_by')
+    client.from('aeration_rounds').select('id,account_id,round_number,completed,completed_at,updated_at,updated_by'),
+    client.from('pruning_hour_contracts').select('id,account_id,contract_year,initial_hours,additional_hours,notes,created_at,updated_at,updated_by'),
+    client.from('pruning_hour_visits').select('id,contract_id,visit_type,sequence_number,work_date,hours_used,notes,created_by,created_at,updated_at')
   ]);
-  const error=accountsResult.error||workTypesResult.error||progressResult.error||fertilizationResult.error||aerationResult.error;
+  const error=accountsResult.error||workTypesResult.error||progressResult.error||fertilizationResult.error||aerationResult.error||pruningContractsResult.error||pruningVisitsResult.error;
   if(error){ console.error(error); setSyncStatus('Sync error',true); return; }
   state.workTypes=workTypesResult.data||[];
   state.fertilizationApplications=fertilizationResult.data||[];
   state.aerationRounds=aerationResult.data||[];
+  state.pruningContracts=pruningContractsResult.data||[];
+  state.pruningVisits=pruningVisitsResult.data||[];
   const progressMap=new Map((progressResult.data||[]).map(r=>[`${r.account_id}:${r.work_type_id}`,r]));
   state.accounts=(accountsResult.data||[]).map(account=>{
     const assembled={...account};
@@ -172,7 +176,9 @@ function subscribeRealtime(){
   state.channel=client.channel('operations-live').on('postgres_changes',{event:'*',schema:'public',table:'accounts'},loadData)
     .on('postgres_changes',{event:'*',schema:'public',table:'account_progress'},loadData)
     .on('postgres_changes',{event:'*',schema:'public',table:'fertilization_applications'},loadData)
-    .on('postgres_changes',{event:'*',schema:'public',table:'aeration_rounds'},loadData).subscribe(status=>{ if(status==='SUBSCRIBED') setSyncStatus('Live sync on'); });
+    .on('postgres_changes',{event:'*',schema:'public',table:'aeration_rounds'},loadData)
+    .on('postgres_changes',{event:'*',schema:'public',table:'pruning_hour_contracts'},loadData)
+    .on('postgres_changes',{event:'*',schema:'public',table:'pruning_hour_visits'},loadData).subscribe(status=>{ if(status==='SUBSCRIBED') setSyncStatus('Live sync on'); });
 }
 async function showApp(session){ state.session=session; els.authScreen.hidden=true; els.appShell.hidden=false; await loadData(); subscribeRealtime(); }
 function showAuth(){ state.session=null; els.appShell.hidden=true; els.authScreen.hidden=false; if(state.channel) client.removeChannel(state.channel); }
