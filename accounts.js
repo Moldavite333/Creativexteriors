@@ -323,14 +323,26 @@ async function savePropertyDetails(event) {
 
   els.propertyDetailsMessage.textContent = 'Saving…';
 
+  const nextAddress = els.propertyAddress.value.trim() || null;
+  const previousAddress = String(state.activeAccountRecord.address || '').trim();
+  const addressChanged = String(nextAddress || '').trim() !== previousAddress;
+
   const updates = {
-    address: els.propertyAddress.value.trim() || null,
+    address: nextAddress,
     contact_name: els.propertyContactName.value.trim() || null,
     contact_phone: els.propertyContactPhone.value.trim() || null,
     contact_email: els.propertyContactEmail.value.trim() || null,
     things_to_know: els.propertyThingsToKnow.value.trim() || null,
     property_lines_url: els.propertyLinesUrl.value.trim() || null
   };
+
+  // A cached parcel belongs to the old address. Never silently carry it to a
+  // different property; require a fresh parcel lookup instead.
+  if (addressChanged) {
+    updates.parcel_geojson = null;
+    updates.parcel_meta = null;
+    updates.parcel_lookup_at = null;
+  }
 
   const { data, error } = await client
     .from('accounts')
@@ -346,7 +358,8 @@ async function savePropertyDetails(event) {
   }
 
   state.activeAccountRecord = { ...state.activeAccountRecord, ...data };
-  els.propertyDetailsMessage.textContent = 'Property file saved.';
+  els.propertyDetailsMessage.textContent = addressChanged ? 'Property file saved. Address changed, so the old parcel boundary was cleared.' : 'Property file saved.';
+  if (addressChanged) renderPropertyParcelMap(state.activeAccountRecord);
   updatePropertyLineButtons();
 }
 
@@ -449,6 +462,7 @@ async function lookupPropertyParcel() {
     if (!data?.feature?.geometry) throw new Error(data?.error || 'No parcel boundary was returned for that address.');
 
     const updates = {
+      address,
       parcel_geojson: data.feature,
       parcel_meta: data.meta || {},
       parcel_lookup_at: new Date().toISOString()
