@@ -7,6 +7,7 @@ state.accountsSearch = '';
 state.activeAccountRecord = null;
 let propertyMap = null;
 let propertyParcelLayer = null;
+let propertyAddressMarker = null;
 
 Object.assign(els, {
   accountsDirectoryList: null,
@@ -23,6 +24,7 @@ Object.assign(els, {
   propertyMap: null,
   propertyParcelSummary: null,
   propertyParcelLookupBtn: null,
+  propertyAddressMapBtn: null,
   propertyLinesOpenBtn: null,
   propertyLinesFindBtn: null,
   propertyCopyAddressBtn: null,
@@ -189,9 +191,10 @@ function ensurePropertyDialog() {
             <div id="propertyParcelSummary" class="property-parcel-summary">No parcel boundary saved yet.</div>
             <div class="property-map-actions">
               <button id="propertyParcelLookupBtn" class="primary-btn" type="button">Find / Refresh Parcel</button>
-              <button id="propertyCopyAddressBtn" class="secondary-btn" type="button">Copy Address</button>
+              <button id="propertyAddressMapBtn" class="secondary-btn" type="button">Open Address Map</button>
               <button id="propertyLinesFindBtn" class="secondary-btn" type="button">Open Regrid</button>
               <button id="propertyLinesOpenBtn" class="secondary-btn" type="button">Open Saved Map</button>
+              <button id="propertyCopyAddressBtn" class="secondary-btn" type="button">Copy Address</button>
             </div>
             <label>Saved property-lines link
               <input id="propertyLinesUrl" type="url" maxlength="1000" placeholder="Optional direct parcel or property map link" />
@@ -240,6 +243,7 @@ function ensurePropertyDialog() {
   els.propertyMap = dialog.querySelector('#propertyMap');
   els.propertyParcelSummary = dialog.querySelector('#propertyParcelSummary');
   els.propertyParcelLookupBtn = dialog.querySelector('#propertyParcelLookupBtn');
+  els.propertyAddressMapBtn = dialog.querySelector('#propertyAddressMapBtn');
   els.propertyLinesOpenBtn = dialog.querySelector('#propertyLinesOpenBtn');
   els.propertyLinesFindBtn = dialog.querySelector('#propertyLinesFindBtn');
   els.propertyCopyAddressBtn = dialog.querySelector('#propertyCopyAddressBtn');
@@ -257,6 +261,7 @@ function ensurePropertyDialog() {
   els.propertyDetailsForm.addEventListener('submit', savePropertyDetails);
   els.propertyRequestForm.addEventListener('submit', addSpecialRequest);
   els.propertyParcelLookupBtn.addEventListener('click', lookupPropertyParcel);
+  els.propertyAddressMapBtn.addEventListener('click', openPropertyAddressMap);
   els.propertyLinesOpenBtn.addEventListener('click', openSavedPropertyLines);
   els.propertyLinesFindBtn.addEventListener('click', openPropertyLineFinder);
   els.propertyCopyAddressBtn.addEventListener('click', copyPropertyAddress);
@@ -313,7 +318,14 @@ async function openPropertyRecord(accountId) {
 
   updatePropertyLineButtons();
   els.propertyDialog.showModal();
-  window.requestAnimationFrame(() => renderPropertyParcelMap(data));
+  window.requestAnimationFrame(() => {
+    renderPropertyParcelMap(data);
+    const meta = data.parcel_meta || {};
+    const hasCoordinates = Number.isFinite(Number(meta.latitude)) && Number.isFinite(Number(meta.longitude));
+    if (data.address && !data.parcel_geojson && !hasCoordinates) {
+      window.setTimeout(() => lookupPropertyParcel({ silent: true }), 0);
+    }
+  });
   await loadSpecialRequests(accountId);
 }
 
@@ -368,6 +380,7 @@ function updatePropertyLineButtons() {
   const savedUrl = els.propertyLinesUrl.value.trim();
 
   els.propertyParcelLookupBtn.disabled = !address;
+  els.propertyAddressMapBtn.disabled = !address;
   els.propertyLinesOpenBtn.disabled = !savedUrl;
   els.propertyCopyAddressBtn.disabled = !address;
   els.propertyLinesFindBtn.disabled = !address;
@@ -407,8 +420,23 @@ function renderPropertyParcelMap(record = state.activeAccountRecord) {
     propertyParcelLayer.remove();
     propertyParcelLayer = null;
   }
+  if (propertyAddressMarker) {
+    propertyAddressMarker.remove();
+    propertyAddressMarker = null;
+  }
 
   const geojson = record?.parcel_geojson;
+  const meta = record?.parcel_meta || {};
+  const latitude = Number(meta.latitude);
+  const longitude = Number(meta.longitude);
+  const hasCoordinates = Number.isFinite(latitude) && Number.isFinite(longitude);
+
+  if (hasCoordinates) {
+    propertyAddressMarker = L.marker([latitude, longitude])
+      .addTo(propertyMap)
+      .bindPopup(escapeHtml(meta.matched_address || record?.address || 'Property'));
+  }
+
   if (geojson?.geometry || geojson?.type === 'FeatureCollection') {
     propertyParcelLayer = L.geoJSON(geojson, {
       style: {
@@ -422,6 +450,9 @@ function renderPropertyParcelMap(record = state.activeAccountRecord) {
 
     const bounds = propertyParcelLayer.getBounds();
     if (bounds.isValid()) propertyMap.fitBounds(bounds.pad(0.18), { maxZoom: 19 });
+  } else if (hasCoordinates) {
+    propertyMap.setView([latitude, longitude], 18);
+    propertyAddressMarker?.openPopup();
   } else {
     propertyMap.setView([39.7392, -104.9903], 10);
   }
@@ -430,16 +461,19 @@ function renderPropertyParcelMap(record = state.activeAccountRecord) {
   window.setTimeout(() => propertyMap?.invalidateSize(), 40);
 }
 
-async function lookupPropertyParcel() {
+async function lookupPropertyParcel(options = {}) {
   if (!state.activeAccountRecord) return;
   const address = els.propertyAddress.value.trim();
   if (!address) return;
 
+  const silent = !!options.silent;
   const button = els.propertyParcelLookupBtn;
   const originalText = button.textContent;
   button.disabled = true;
-  button.textContent = 'Finding parcel…';
-  els.propertyDetailsMessage.textContent = 'Looking up the property boundary…';
+  if (!silent) {
+    button.textContent = 'Finding parcel…';
+    els.propertyDetailsMessage.textContent = 'Locating the property and checking for a parcel boundary…';
+  }
 
   try {
     const { data, error } = await client.functions.invoke('parcel-lookup', {
@@ -447,23 +481,21 @@ async function lookupPropertyParcel() {
     });
 
     if (error) {
-      let detail = error.message || 'Parcel lookup failed.';
+      let detail = error.message || 'Property lookup failed.';
       try {
         const body = await error.context?.json?.();
-        if (body?.code === 'REGRID_NOT_CONFIGURED') {
-          detail = 'Parcel lookup is built, but the Regrid API token still needs to be added to Supabase.';
-        } else if (body?.error) {
-          detail = body.error;
-        }
+        if (body?.error) detail = body.error;
       } catch {}
       throw new Error(detail);
     }
 
-    if (!data?.feature?.geometry) throw new Error(data?.error || 'No parcel boundary was returned for that address.');
+    const hasParcel = !!data?.feature?.geometry;
+    const hasLocation = Number.isFinite(Number(data?.meta?.latitude)) && Number.isFinite(Number(data?.meta?.longitude));
+    if (!hasParcel && !hasLocation) throw new Error(data?.error || 'The address could not be located.');
 
     const updates = {
       address,
-      parcel_geojson: data.feature,
+      parcel_geojson: hasParcel ? data.feature : null,
       parcel_meta: data.meta || {},
       parcel_lookup_at: new Date().toISOString()
     };
@@ -485,14 +517,26 @@ async function lookupPropertyParcel() {
     if (saved.property_lines_url) els.propertyLinesUrl.value = saved.property_lines_url;
     renderPropertyParcelMap(state.activeAccountRecord);
     updatePropertyLineButtons();
-    els.propertyDetailsMessage.textContent = 'Parcel boundary found and saved to this account.';
+
+    if (!silent) {
+      els.propertyDetailsMessage.textContent = hasParcel
+        ? 'Parcel boundary found and saved to this account.'
+        : (data?.error || 'Address located and centered on the map. Parcel boundary is not available yet.');
+    }
   } catch (error) {
     console.error(error);
-    els.propertyDetailsMessage.textContent = error.message || 'Could not find the parcel boundary.';
+    if (!silent) els.propertyDetailsMessage.textContent = error.message || 'Could not locate this property.';
   } finally {
     button.textContent = originalText;
     updatePropertyLineButtons();
   }
+}
+
+function openPropertyAddressMap() {
+  const address = els.propertyAddress.value.trim();
+  if (!address) return;
+  const url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 function openSavedPropertyLines() {
