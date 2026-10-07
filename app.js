@@ -11,7 +11,7 @@ const TASKS = [
 ];
 
 const state = {
-  accounts: [], workTypes: [], search: '', filter: 'all', session: null,
+  accounts: [], workTypes: [], fertilizationApplications: [], search: '', filter: 'all', session: null,
   channel: null, historyOpen: false, activeTab: 'fall-cutbacks'
 };
 
@@ -50,14 +50,16 @@ function overallPercent(){ return state.accounts.length ? Math.round(state.accou
 
 async function loadData(){
   setSyncStatus('Syncing…');
-  const [accountsResult,workTypesResult,progressResult]=await Promise.all([
+  const [accountsResult,workTypesResult,progressResult,fertilizationResult]=await Promise.all([
     client.from('accounts').select('id,name,created_at,completed_at').order('name'),
     client.from('work_types').select('id,name,sort_order').eq('active',true).order('sort_order'),
-    client.from('account_progress').select('account_id,work_type_id,progress,completed_at')
+    client.from('account_progress').select('account_id,work_type_id,progress,completed_at'),
+    client.from('fertilization_applications').select('id,account_id,application_number,completed,completed_at,updated_at,updated_by')
   ]);
-  const error=accountsResult.error||workTypesResult.error||progressResult.error;
+  const error=accountsResult.error||workTypesResult.error||progressResult.error||fertilizationResult.error;
   if(error){ console.error(error); setSyncStatus('Sync error',true); return; }
   state.workTypes=workTypesResult.data||[];
+  state.fertilizationApplications=fertilizationResult.data||[];
   const progressMap=new Map((progressResult.data||[]).map(r=>[`${r.account_id}:${r.work_type_id}`,r]));
   state.accounts=(accountsResult.data||[]).map(account=>{
     const assembled={...account};
@@ -166,7 +168,8 @@ function switchTab(tab){
 function subscribeRealtime(){
   if(state.channel) client.removeChannel(state.channel);
   state.channel=client.channel('operations-live').on('postgres_changes',{event:'*',schema:'public',table:'accounts'},loadData)
-    .on('postgres_changes',{event:'*',schema:'public',table:'account_progress'},loadData).subscribe(status=>{ if(status==='SUBSCRIBED') setSyncStatus('Live sync on'); });
+    .on('postgres_changes',{event:'*',schema:'public',table:'account_progress'},loadData)
+    .on('postgres_changes',{event:'*',schema:'public',table:'fertilization_applications'},loadData).subscribe(status=>{ if(status==='SUBSCRIBED') setSyncStatus('Live sync on'); });
 }
 async function showApp(session){ state.session=session; els.authScreen.hidden=true; els.appShell.hidden=false; await loadData(); subscribeRealtime(); }
 function showAuth(){ state.session=null; els.appShell.hidden=true; els.authScreen.hidden=false; if(state.channel) client.removeChannel(state.channel); }
