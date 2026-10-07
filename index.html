@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#ffffff" />
-  <meta name="app-build" content="20261007-04" />
+  <meta name="app-build" content="20261007-05" />
   <title>Creativexteriors | Operations</title>
   <link rel="stylesheet" href="styles.css?v=20261007-orange02" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
@@ -29,6 +29,7 @@
     </header>
 
     <nav class="module-tabs" aria-label="Operations modules">
+      <button class="module-tab" data-tab="dashboard" type="button">Dashboard</button>
       <button class="module-tab active" data-tab="fall-cutbacks" type="button">Fall Cutbacks</button>
       <button class="module-tab" data-tab="maintenance" type="button">Maintenance</button>
       <button class="module-tab" data-tab="color" type="button">Color</button>
@@ -37,6 +38,20 @@
       <button class="module-tab" data-tab="native-mows" type="button">Native Mows</button>
       <button class="module-tab" data-tab="misc-crew" type="button">Misc. Crew</button>
     </nav>
+
+    <section class="module-panel" data-panel="dashboard">
+      <div class="dashboard-heading">
+        <div>
+          <p class="eyebrow">OPERATIONS OVERVIEW</p>
+          <h2>Dashboard</h2>
+        </div>
+        <div class="dashboard-heading-meta"><strong id="dashboardAccountCount">0</strong> properties</div>
+      </div>
+      <section class="dashboard-controls">
+        <input id="dashboardSearchInput" type="search" placeholder="Search properties…" autocomplete="off" />
+      </section>
+      <section id="dashboardCards" class="dashboard-grid" aria-live="polite"></section>
+    </section>
 
     <section id="fall-cutbacks" class="module-panel active" data-panel="fall-cutbacks">
       <div class="module-heading"><div><p class="eyebrow">SEASONAL OPERATIONS</p><h2>Fall Cutbacks</h2></div></div>
@@ -192,6 +207,7 @@
   <script src="irrigation.js?v=20261007-01"></script>
   <script src="agro.js?v=20261007-03"></script>
   <script src="pruning.js?v=20261007-01"></script>
+  <script src="dashboard.js?v=20261007-01"></script>
   <script src="update.js?v=20261007-01"></script>
 </body>
 </html>
