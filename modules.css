@@ -1,3 +1,9 @@
 .color-card .color-restore-btn{margin-top:12px;width:100%}
 .color-card .account-status{letter-spacing:.02em}
 [data-panel="color"] .summary-card{margin-bottom:12px}
+
+.agro-section-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.agro-section-card{min-height:150px}
+.agro-section-card h3{margin:5px 0 8px}
+.agro-section-card p:last-child{margin:0;color:var(--muted);line-height:1.45}
+@media(max-width:760px){.agro-section-grid{grid-template-columns:1fr}}
