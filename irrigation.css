@@ -1,0 +1,67 @@
+.irrigation-summary-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px
+}
+.irrigation-controls{grid-template-columns:1fr}
+.irrigation-account-row{
+  display:flex;align-items:stretch;background:rgba(23,35,29,.96);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)
+}
+.irrigation-account-main{
+  flex:1;display:flex;align-items:center;justify-content:space-between;gap:14px;
+  border:0;background:transparent;color:var(--text);padding:13px 15px;text-align:left
+}
+.irrigation-account-main strong,.irrigation-account-main span{display:block}
+.irrigation-account-main>div:first-child>span{margin-top:3px;color:var(--muted);font-size:.74rem}
+.irrigation-account-statuses{text-align:right;color:#b5c6bb;font-size:.7rem;line-height:1.45;white-space:nowrap}
+.irrigation-billing-section{margin-top:20px}
+.irrigation-billing-queue{display:grid;gap:8px}
+.billing-queue-row{
+  display:flex;justify-content:space-between;gap:12px;align-items:flex-start;
+  background:rgba(23,35,29,.96);border:1px solid var(--line);border-radius:13px;padding:12px;cursor:pointer
+}
+.billing-queue-row strong,.billing-queue-row span{display:block}
+.billing-queue-row span{color:var(--muted);font-size:.72rem;margin-top:3px}
+.billing-queue-row p{margin:7px 0 0;color:#c9d5cd;font-size:.82rem}
+.billing-queue-amount{text-align:right;white-space:nowrap}
+.billing-queue-amount>strong{font-size:1.05rem}
+.billing-queue-amount>span{font-size:.62rem;font-weight:900;letter-spacing:.06em;color:#a9cdb0}
+.irrigation-dialog{width:min(860px,calc(100% - 18px))}
+.irrigation-record-card{max-height:92vh;overflow:auto}
+.irrigation-record-heading{position:sticky;top:-17px;z-index:4;background:rgba(23,35,29,.98);padding-top:17px}
+.irrigation-event-form label,.irrigation-billing-box label,.irrigation-field-controls label{
+  display:grid;gap:6px;color:#c6d2ca;font-size:.79rem;font-weight:750;margin-bottom:10px
+}
+.irrigation-event-form input,.irrigation-event-form select,.irrigation-event-form textarea,
+.irrigation-billing-box input,.irrigation-billing-box select,.irrigation-billing-box textarea,
+.irrigation-field-controls select{
+  width:100%;border:1px solid var(--line);background:#0d1511;color:var(--text);
+  border-radius:10px;padding:10px 11px;outline:none
+}
+.irrigation-event-form textarea,.irrigation-billing-box textarea{min-height:82px;resize:vertical}
+.irrigation-form-grid,.irrigation-billing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.irrigation-billing-grid{grid-template-columns:1fr 1fr}
+.irrigation-event-list{display:grid;gap:10px}
+.irrigation-event-card{
+  border:1px solid var(--line);border-radius:13px;background:#0d1511;padding:12px
+}
+.irrigation-event-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.irrigation-event-head strong{display:block;margin-top:5px}
+.irrigation-type-chip,.irrigation-status-chip{
+  display:inline-block;border:1px solid #3b5144;border-radius:999px;padding:4px 7px;
+  font-size:.64rem;font-weight:900;letter-spacing:.05em
+}
+.irrigation-status-chip{color:#c8d6cc}
+.irrigation-detail{margin-top:11px;padding-top:10px;border-top:1px solid rgba(45,64,53,.7)}
+.irrigation-detail span{color:#82968a;font-size:.62rem;font-weight:900;letter-spacing:.08em}
+.irrigation-detail p{margin:5px 0 0;line-height:1.42;white-space:pre-wrap}
+.irrigation-field-controls{margin-top:11px;max-width:220px}
+.irrigation-billing-box{margin-top:12px;padding:12px;border:1px solid #3b4e43;border-radius:11px;background:#142019}
+.irrigation-save-billing{margin-top:2px}
+@media(max-width:620px){
+  .irrigation-summary-grid{grid-template-columns:1fr 1fr}
+  .irrigation-account-main{align-items:flex-start;flex-direction:column}
+  .irrigation-account-statuses{text-align:left}
+  .irrigation-form-grid,.irrigation-billing-grid{grid-template-columns:1fr}
+  .billing-queue-row{flex-direction:column}
+  .billing-queue-amount{text-align:left}
+}
