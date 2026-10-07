@@ -1,6 +1,6 @@
 const modulesStyles = document.createElement('link');
 modulesStyles.rel = 'stylesheet';
-modulesStyles.href = 'modules.css?v=20261007-01';
+modulesStyles.href = 'modules.css?v=20261007-02';
 document.head.appendChild(modulesStyles);
 
 const FALL_TASK_KEYS = new Set(['perennials', 'roses']);
