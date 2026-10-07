@@ -81,7 +81,7 @@ function agroRoundCard(type, roundNumber) {
     const manageButton = document.createElement('button');
     manageButton.type = 'button';
     manageButton.className = 'secondary-btn agro-manage-btn';
-    manageButton.textContent = 'Add / Remove Accounts';
+    manageButton.textContent = 'Choose Accounts';
     manageButton.addEventListener('click', () => openAgroRoundManager(type, roundNumber));
     actions.appendChild(manageButton);
   }
