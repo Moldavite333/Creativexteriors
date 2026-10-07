@@ -75,7 +75,39 @@
       <section id="colorAccountsList" class="accounts-list" aria-live="polite"></section>
     </section>
 
-    <section class="module-panel" data-panel="pruning"><div class="coming-soon"><p class="eyebrow">MODULE</p><h2>Pruning</h2><p>Ready to build when you are.</p></div></section>
+    <section class="module-panel" data-panel="pruning">
+      <div class="module-heading">
+        <div>
+          <p class="eyebrow">PRUNING OPERATIONS</p>
+          <h2>Pruning Hours</h2>
+        </div>
+      </div>
+
+      <section class="summary-card">
+        <strong>2026 Contract Hour Ledger</strong>
+        <p>Initial and Additional Prune hours are sold in the contract up front. Log the hours you actually use on each visit and the remaining balance updates automatically.</p>
+      </section>
+
+      <section class="pruning-summary" aria-label="Pruning hour summary">
+        <div class="pruning-summary-cell"><span>Contract Hours</span><strong id="pruningContractHours">0</strong></div>
+        <div class="pruning-summary-cell"><span>Used Hours</span><strong id="pruningUsedHours">0</strong></div>
+        <div class="pruning-summary-cell"><span>Remaining</span><strong id="pruningRemainingHours">0</strong></div>
+        <div class="pruning-summary-cell"><span>Properties</span><strong id="pruningPropertyCount">0</strong></div>
+      </section>
+
+      <section class="controls pruning-controls">
+        <input id="pruningSearchInput" type="search" placeholder="Search pruning accounts…" autocomplete="off" />
+        <select id="pruningFilterSelect" aria-label="Filter pruning accounts">
+          <option value="all">All Accounts</option>
+          <option value="configured">Contract Loaded</option>
+          <option value="remaining">Hours Remaining</option>
+          <option value="over">Over Budget</option>
+          <option value="unset">Not Set Up</option>
+        </select>
+      </section>
+
+      <section id="pruningAccountsList" class="pruning-accounts-list" aria-live="polite"></section>
+    </section>
     <section class="module-panel" data-panel="organics">
       <div class="module-heading"><div><p class="eyebrow">AGRONOMIC OPERATIONS</p><h2>Agro</h2></div></div>
       <section class="summary-card">
@@ -151,12 +183,13 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="app.js?v=20261007-02"></script>
+  <script src="app.js?v=20261007-03"></script>
   <script src="applicability.js?v=20261005-1503"></script>
   <script src="roles.js?v=20261007-01"></script>
   <script src="modules.js?v=20261007-02"></script>
   <script src="accounts.js?v=20261007-05"></script>
   <script src="irrigation.js?v=20261007-01"></script>
   <script src="agro.js?v=20261007-03"></script>
+  <script src="pruning.js?v=20261007-01"></script>
 </body>
 </html>
