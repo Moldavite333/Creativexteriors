@@ -176,7 +176,7 @@ function ensureAgroRoundManager() {
   const dialog = document.createElement('dialog');
   dialog.className = 'agro-manage-dialog';
   dialog.innerHTML = `
-    <form id="agroManageForm" class="dialog-card agro-manage-card">
+    <div class="dialog-card agro-manage-card">
       <div class="dialog-heading">
         <div>
           <p class="eyebrow">AGRO</p>
@@ -184,11 +184,11 @@ function ensureAgroRoundManager() {
         </div>
         <button id="agroManageClose" class="icon-btn" type="button" aria-label="Close">×</button>
       </div>
-      <p id="agroManageCopy" class="dialog-copy">Choose the accounts for this round.</p>
+      <p id="agroManageCopy" class="dialog-copy">Choose the accounts for this round. Changes save immediately.</p>
       <div id="agroAccountChoices" class="agro-account-choices"></div>
       <p id="agroManageMessage" class="auth-message" role="status"></p>
-      <button class="primary-btn wide" type="submit">Save Accounts</button>
-    </form>
+      <button id="agroManageDone" class="primary-btn wide" type="button">Done</button>
+    </div>
   `;
 
   document.body.appendChild(dialog);
@@ -196,15 +196,14 @@ function ensureAgroRoundManager() {
   els.agroManageTitle = dialog.querySelector('#agroManageTitle');
   els.agroManageCopy = dialog.querySelector('#agroManageCopy');
   els.agroAccountChoices = dialog.querySelector('#agroAccountChoices');
-  els.agroManageForm = dialog.querySelector('#agroManageForm');
   els.agroManageMessage = dialog.querySelector('#agroManageMessage');
   els.agroManageClose = dialog.querySelector('#agroManageClose');
 
   els.agroManageClose.addEventListener('click', () => dialog.close());
+  dialog.querySelector('#agroManageDone')?.addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', event => {
     if (event.target === dialog) dialog.close();
   });
-  els.agroManageForm.addEventListener('submit', saveAgroRoundAccounts);
 }
 
 function openAgroRoundManager(type, roundNumber) {
@@ -215,7 +214,7 @@ function openAgroRoundManager(type, roundNumber) {
   state.activeAgroAssignment = { type, roundNumber: Number(roundNumber) };
 
   els.agroManageTitle.textContent = `${config.label} · Round ${roundNumber}`;
-  els.agroManageCopy.textContent = `Check every account that belongs in ${config.label} Round ${roundNumber}.`;
+  els.agroManageCopy.textContent = `Click the accounts that belong in ${config.label} Round ${roundNumber}. They are added or removed immediately.`;
   els.agroManageMessage.textContent = '';
 
   const assigned = new Set(
@@ -233,7 +232,14 @@ function openAgroRoundManager(type, roundNumber) {
       label.innerHTML = `
         <input type="checkbox" value="${account.id}" ${assigned.has(account.id) ? 'checked' : ''} />
         <span>${escapeHtml(account.name)}</span>
+        <span class="agro-choice-state">${assigned.has(account.id) ? 'Added' : ''}</span>
       `;
+
+      const checkbox = label.querySelector('input');
+      checkbox.addEventListener('change', () => {
+        setAgroRoundAssignment(type, roundNumber, account, checkbox.checked, label);
+      });
+
       els.agroAccountChoices.appendChild(label);
     });
 
@@ -244,68 +250,74 @@ function openAgroRoundManager(type, roundNumber) {
   els.agroManageDialog.showModal();
 }
 
-async function saveAgroRoundAccounts(event) {
-  event.preventDefault();
+async function setAgroRoundAssignment(type, roundNumber, account, assigned, label) {
+  const config = AGRO_TRACKERS[type];
+  if (!config || !account) return;
   if (typeof canManageAll === 'function' && !canManageAll()) return;
 
-  const assignment = state.activeAgroAssignment;
-  const config = assignment ? AGRO_TRACKERS[assignment.type] : null;
-  if (!config) return;
+  const checkbox = label?.querySelector('input');
+  const stateLabel = label?.querySelector('.agro-choice-state');
+  if (checkbox) checkbox.disabled = true;
+  if (stateLabel) stateLabel.textContent = 'Saving…';
+  els.agroManageMessage.textContent = '';
 
-  const roundNumber = Number(assignment.roundNumber);
-  if (roundNumber < 1 || roundNumber > config.rounds) return;
+  try {
+    if (assigned) {
+      const row = {
+        account_id: account.id,
+        [config.roundField]: Number(roundNumber),
+        completed: false,
+        updated_at: new Date().toISOString(),
+        updated_by: state.session.user.id
+      };
 
-  const selected = new Set(
-    [...els.agroAccountChoices.querySelectorAll('input[type="checkbox"]:checked')]
-      .map(input => input.value)
-  );
+      const { data, error } = await client
+        .from(config.table)
+        .upsert(row, { onConflict: `account_id,${config.roundField}` })
+        .select('id,account_id,' + config.roundField + ',completed,completed_at,updated_at,updated_by')
+        .single();
 
-  const currentRows = (state[config.stateKey] || [])
-    .filter(row => Number(row[config.roundField]) === roundNumber);
-  const current = new Set(currentRows.map(row => row.account_id));
+      if (error) throw error;
 
-  const toAdd = [...selected].filter(accountId => !current.has(accountId));
-  const toRemove = [...current].filter(accountId => !selected.has(accountId));
+      const existingIndex = (state[config.stateKey] || []).findIndex(item =>
+        item.account_id === account.id &&
+        Number(item[config.roundField]) === Number(roundNumber)
+      );
 
-  els.agroManageMessage.textContent = 'Saving…';
-  setSyncStatus('Saving…');
+      if (existingIndex >= 0) state[config.stateKey][existingIndex] = data;
+      else state[config.stateKey].push(data);
 
-  if (toAdd.length) {
-    const rows = toAdd.map(accountId => ({
-      account_id: accountId,
-      [config.roundField]: roundNumber,
-      completed: false,
-      updated_at: new Date().toISOString(),
-      updated_by: state.session.user.id
-    }));
+      if (stateLabel) stateLabel.textContent = 'Added';
+      els.agroManageMessage.textContent = `${account.name} added to ${config.label} Round ${roundNumber}.`;
+    } else {
+      const { error } = await client
+        .from(config.table)
+        .delete()
+        .eq('account_id', account.id)
+        .eq(config.roundField, Number(roundNumber));
 
-    const { error } = await client.from(config.table).insert(rows);
-    if (error) {
-      console.error(error);
-      els.agroManageMessage.textContent = error.message;
-      setSyncStatus('Save failed', true);
-      return;
+      if (error) throw error;
+
+      state[config.stateKey] = (state[config.stateKey] || []).filter(item =>
+        !(item.account_id === account.id &&
+          Number(item[config.roundField]) === Number(roundNumber))
+      );
+
+      if (stateLabel) stateLabel.textContent = '';
+      els.agroManageMessage.textContent = `${account.name} removed from ${config.label} Round ${roundNumber}.`;
     }
+
+    renderAgroTracker(type);
+    setSyncStatus('Live sync on');
+  } catch (error) {
+    console.error(error);
+    if (checkbox) checkbox.checked = !assigned;
+    if (stateLabel) stateLabel.textContent = !assigned ? 'Added' : '';
+    els.agroManageMessage.textContent = 'Could not update this round: ' + (error.message || 'Unknown error');
+    setSyncStatus('Save failed', true);
+  } finally {
+    if (checkbox) checkbox.disabled = false;
   }
-
-  if (toRemove.length) {
-    const { error } = await client
-      .from(config.table)
-      .delete()
-      .eq(config.roundField, roundNumber)
-      .in('account_id', toRemove);
-
-    if (error) {
-      console.error(error);
-      els.agroManageMessage.textContent = error.message;
-      setSyncStatus('Save failed', true);
-      await loadData();
-      return;
-    }
-  }
-
-  await loadData();
-  els.agroManageDialog.close();
 }
 
 document.querySelector('[data-tab="organics"]')?.addEventListener('click', renderAgro);
