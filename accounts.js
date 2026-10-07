@@ -1,6 +1,6 @@
 const accountsStyles = document.createElement('link');
 accountsStyles.rel = 'stylesheet';
-accountsStyles.href = 'accounts.css?v=20261007-02';
+accountsStyles.href = 'accounts.css?v=20261007-light01';
 document.head.appendChild(accountsStyles);
 
 state.accountsSearch = '';
