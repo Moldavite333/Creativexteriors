@@ -47,15 +47,15 @@
 .irrigation-event-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .irrigation-event-head strong{display:block;margin-top:5px}
 .irrigation-type-chip,.irrigation-status-chip{
-  display:inline-block;border:1px solid #c9d5ca;border-radius:999px;padding:4px 7px;
+  display:inline-block;border:1px solid #d2d2d2;border-radius:999px;padding:4px 7px;
   font-size:.64rem;font-weight:900;letter-spacing:.05em
 }
-.irrigation-status-chip{color:var(--green-dark)}
+.irrigation-status-chip{color:#111}
 .irrigation-detail{margin-top:11px;padding-top:10px;border-top:1px solid var(--line)}
 .irrigation-detail span{color:var(--muted);font-size:.62rem;font-weight:900;letter-spacing:.08em}
 .irrigation-detail p{margin:5px 0 0;line-height:1.42;white-space:pre-wrap}
 .irrigation-field-controls{margin-top:11px;max-width:220px}
-.irrigation-billing-box{margin-top:12px;padding:12px;border:1px solid #d5ddd6;border-radius:11px;background:#f7f9f5}
+.irrigation-billing-box{margin-top:12px;padding:12px;border:1px solid #d5ddd6;border-radius:11px;background:#fafafa}
 .irrigation-save-billing{margin-top:2px}
 @media(max-width:620px){
   .irrigation-summary-grid{grid-template-columns:1fr 1fr}
