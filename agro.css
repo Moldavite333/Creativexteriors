@@ -1,25 +1,25 @@
 .agro-sections{display:grid;gap:14px;margin-top:14px}
-.agro-work-section{background:#111a15;border:1px solid var(--line);border-radius:14px;padding:14px}
+.agro-work-section{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
 .agro-work-section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
 .agro-work-section h3{margin:4px 0 6px}
 .agro-work-section-copy{margin:0;color:var(--muted);line-height:1.45;font-size:.86rem}
 .agro-round-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.agro-round-card{border:1px solid var(--line);border-radius:13px;padding:12px;background:#0d1511}
+.agro-round-card{border:1px solid var(--line);border-radius:13px;padding:12px;background:var(--panel-2)}
 .agro-round-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .agro-round-head h4{margin:3px 0 3px;font-size:1.08rem}
 .agro-round-count{font-size:.72rem;color:var(--muted);font-weight:800}
 .agro-manage-btn{padding:8px 10px;font-size:.72rem}
 .agro-account-list{display:grid;gap:7px;margin-top:10px}
-.agro-account-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:#111a15;cursor:pointer}
+.agro-account-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);cursor:pointer}
 .agro-account-row.complete{opacity:.72}
-.agro-account-row input{width:19px;height:19px;accent-color:#9fb68e}
+.agro-account-row input{width:19px;height:19px;accent-color:var(--green)}
 .agro-account-name{font-weight:800}
 .agro-account-status{font-size:.7rem;color:var(--muted);text-align:right}
 .agro-manage-dialog{width:min(620px,calc(100% - 18px))}
 .agro-manage-card{max-height:88vh;overflow:auto}
 .agro-account-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px 0}
-.agro-choice-row{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#0d1511}
-.agro-choice-row input{width:19px;height:19px;accent-color:#9fb68e}
+.agro-choice-row{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2)}
+.agro-choice-row input{width:19px;height:19px;accent-color:var(--green)}
 @media(max-width:760px){
   .agro-round-grid{grid-template-columns:1fr}
   .agro-account-choices{grid-template-columns:1fr}
