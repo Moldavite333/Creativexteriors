@@ -518,17 +518,27 @@ async function lookupPropertyParcel(options = {}) {
       .select('id,name,address,contact_name,contact_phone,contact_email,things_to_know,property_lines_url,parcel_geojson,parcel_meta,parcel_lookup_at')
       .single();
 
-    if (saveError) throw saveError;
+    // Crew/client roles may be allowed to view a property but not modify its
+    // permanent record. They should still see the located address on the map.
+    const resolvedRecord = saveError
+      ? { ...state.activeAccountRecord, ...updates }
+      : { ...state.activeAccountRecord, ...saved };
 
-    state.activeAccountRecord = { ...state.activeAccountRecord, ...saved };
-    if (saved.property_lines_url) els.propertyLinesUrl.value = saved.property_lines_url;
+    state.activeAccountRecord = resolvedRecord;
+    if (!saveError && saved?.property_lines_url) els.propertyLinesUrl.value = saved.property_lines_url;
     renderPropertyParcelMap(state.activeAccountRecord);
     updatePropertyLineButtons();
 
     if (!silent) {
-      els.propertyDetailsMessage.textContent = hasParcel
-        ? 'Parcel boundary found and saved to this account.'
-        : (data?.error || 'Address located and centered on the map. Parcel boundary is not available yet.');
+      if (saveError) {
+        els.propertyDetailsMessage.textContent = hasParcel
+          ? 'Parcel found and displayed, but your role cannot save permanent property-map data.'
+          : 'Address located and displayed. Your role cannot save permanent property-map data.';
+      } else {
+        els.propertyDetailsMessage.textContent = hasParcel
+          ? 'Parcel boundary found and saved to this account.'
+          : (data?.error || 'Address located and centered on the map. Parcel boundary is not available yet.');
+      }
     }
   } catch (error) {
     console.error(error);
