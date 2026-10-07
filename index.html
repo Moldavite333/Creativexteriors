@@ -81,18 +81,39 @@
         <strong>Soil, turf & plant-health production</strong>
         <p>Track repeatable rounds and one-off work across organics, fertilization, and aeration without forcing every property into the same program.</p>
       </section>
-      <div class="agro-section-grid">
-        <section class="summary-card agro-section-card">
-          <p class="eyebrow">AGRO SECTION</p><h3>Organics</h3>
-          <p>Add any number of amendments or soil-health jobs and track each application round independently.</p>
+
+      <div class="agro-sections">
+        <section class="agro-work-section">
+          <div class="agro-work-section-head">
+            <div>
+              <p class="eyebrow">AGRO SECTION</p>
+              <h3>Organics</h3>
+              <p class="agro-work-section-copy">Add any number of amendments or soil-health jobs and track each round independently.</p>
+            </div>
+          </div>
+          <div class="history-empty">Custom organics jobs are the next Agro build.</div>
         </section>
-        <section class="summary-card agro-section-card">
-          <p class="eyebrow">AGRO SECTION</p><h3>Fertilization</h3>
-          <p>Track fertilizer rounds by property, product, timing, and completion.</p>
+
+        <section class="agro-work-section">
+          <div class="agro-work-section-head">
+            <div>
+              <p class="eyebrow">AGRO SECTION</p>
+              <h3>Fertilization</h3>
+              <p class="agro-work-section-copy">Four separate fertilizer rounds. Add the accounts for each round and check Done as each property is completed.</p>
+            </div>
+          </div>
+          <div id="fertilizationRounds" class="agro-round-grid" aria-live="polite"></div>
         </section>
-        <section class="summary-card agro-section-card">
-          <p class="eyebrow">AGRO SECTION</p><h3>Aeration</h3>
-          <p>Track aeration scheduling and completion separately from fertilizer and amendment work.</p>
+
+        <section class="agro-work-section">
+          <div class="agro-work-section-head">
+            <div>
+              <p class="eyebrow">AGRO SECTION</p>
+              <h3>Aeration</h3>
+              <p class="agro-work-section-copy">Two separate aeration visits: Round 1 and Round 2. Track the account list and completion for each visit independently.</p>
+            </div>
+          </div>
+          <div id="aerationRounds" class="agro-round-grid agro-round-grid-two" aria-live="polite"></div>
         </section>
       </div>
     </section>
@@ -128,11 +149,11 @@
   </template>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>\n  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="app.js?v=20261005-1448"></script>
+  <script src="app.js?v=20261007-02"></script>
   <script src="applicability.js?v=20261005-1503"></script>
   <script src="roles.js?v=20261007-01"></script>
   <script src="modules.js?v=20261007-02"></script>
   <script src="accounts.js?v=20261007-05"></script>
-  <script src="irrigation.js?v=20261007-01"></script>
+  <script src="irrigation.js?v=20261007-01"></script>\n  <script src="agro.js?v=20261007-02"></script>
 </body>
 </html>
