@@ -26,3 +26,5 @@
   .agro-round-head{flex-direction:column}
   .agro-manage-btn{width:100%}
 }
+.agro-choice-row{grid-template-columns:auto 1fr auto}
+.agro-choice-state{font-size:.68rem;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.04em}
