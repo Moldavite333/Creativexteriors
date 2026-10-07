@@ -1,6 +1,6 @@
 const roleStyles = document.createElement('link');
 roleStyles.rel = 'stylesheet';
-roleStyles.href = 'roles.css?v=20261007-light01';
+roleStyles.href = 'roles.css?v=20261007-orange01';
 document.head.appendChild(roleStyles);
 
 state.profile = null;
