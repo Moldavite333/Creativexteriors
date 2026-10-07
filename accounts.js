@@ -321,7 +321,7 @@ async function openPropertyRecord(accountId) {
   window.requestAnimationFrame(() => {
     renderPropertyParcelMap(data);
     const meta = data.parcel_meta || {};
-    const hasCoordinates = Number.isFinite(Number(meta.latitude)) && Number.isFinite(Number(meta.longitude));
+    const hasCoordinates = propertyCoordinate(meta.latitude) !== null && propertyCoordinate(meta.longitude) !== null;
     if (data.address && !data.parcel_geojson && !hasCoordinates) {
       window.setTimeout(() => lookupPropertyParcel({ silent: true }), 0);
     }
@@ -386,6 +386,12 @@ function updatePropertyLineButtons() {
   els.propertyLinesFindBtn.disabled = !address;
 }
 
+function propertyCoordinate(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
 function parcelSummary(record) {
   const meta = record?.parcel_meta || {};
   const bits = [];
@@ -393,7 +399,8 @@ function parcelSummary(record) {
   if (Number(meta.acreage) > 0) bits.push(`${Number(meta.acreage).toFixed(2)} acres`);
   if (meta.matched_address) bits.push(meta.matched_address);
   if (!bits.length && record?.parcel_geojson) bits.push('Parcel boundary saved');
-  return bits.join(' · ') || 'No parcel boundary saved yet. Enter a full address and click Find / Refresh Parcel.';
+  if (!bits.length && propertyCoordinate(meta.latitude) !== null) bits.push(record?.address ? `Address located: ${record.address}` : 'Address located');
+  return bits.join(' · ') || 'No property location saved yet. Enter a full address and click Find / Refresh Parcel.';
 }
 
 function renderPropertyParcelMap(record = state.activeAccountRecord) {
@@ -427,9 +434,9 @@ function renderPropertyParcelMap(record = state.activeAccountRecord) {
 
   const geojson = record?.parcel_geojson;
   const meta = record?.parcel_meta || {};
-  const latitude = Number(meta.latitude);
-  const longitude = Number(meta.longitude);
-  const hasCoordinates = Number.isFinite(latitude) && Number.isFinite(longitude);
+  const latitude = propertyCoordinate(meta.latitude);
+  const longitude = propertyCoordinate(meta.longitude);
+  const hasCoordinates = latitude !== null && longitude !== null;
 
   if (hasCoordinates) {
     propertyAddressMarker = L.marker([latitude, longitude])
@@ -490,7 +497,7 @@ async function lookupPropertyParcel(options = {}) {
     }
 
     const hasParcel = !!data?.feature?.geometry;
-    const hasLocation = Number.isFinite(Number(data?.meta?.latitude)) && Number.isFinite(Number(data?.meta?.longitude));
+    const hasLocation = propertyCoordinate(data?.meta?.latitude) !== null && propertyCoordinate(data?.meta?.longitude) !== null;
     if (!hasParcel && !hasLocation) throw new Error(data?.error || 'The address could not be located.');
 
     const updates = {
