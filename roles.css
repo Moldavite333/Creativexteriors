@@ -1,30 +1,30 @@
 .role-badge{
-  display:inline-block;margin:5px 0 0 8px;padding:3px 7px;border:1px solid #496353;border-radius:999px;
-  color:#b8cabd;font-size:.64rem;font-weight:900;letter-spacing:.08em;vertical-align:middle
+  display:inline-block;margin:5px 0 0 8px;padding:3px 7px;border:1px solid #c2d0c4;border-radius:999px;
+  color:var(--green-dark);font-size:.64rem;font-weight:900;letter-spacing:.08em;vertical-align:middle
 }
 .account-head-actions{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
 .edit-tasks-btn,.property-notes-btn,.task-na-btn{
-  border:1px solid var(--line);background:#223129;color:#dbe4de;border-radius:9px;font-weight:800
+  border:1px solid var(--line);background:#f0f4ef;color:var(--green-dark);border-radius:9px;font-weight:800
 }
 .edit-tasks-btn,.property-notes-btn{padding:6px 9px;font-size:.72rem}
 .task-name-actions{display:flex;align-items:center;gap:7px}
-.task-na-btn{padding:3px 6px;font-size:.64rem;color:#b8c9bd}
+.task-na-btn{padding:3px 6px;font-size:.64rem;color:var(--muted)}
 .progress-buttons button:disabled{opacity:.45;cursor:not-allowed}
 .team-help p{margin:6px 0 0;color:var(--muted);line-height:1.45}
 .team-list{display:grid;gap:10px}
 .team-card{
   display:flex;align-items:center;justify-content:space-between;gap:12px;
-  background:rgba(23,35,29,.96);border:1px solid var(--line);border-radius:14px;padding:13px
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px
 }
 .team-card strong,.team-card span{display:block}.team-card span{margin-top:3px;color:var(--muted);font-size:.78rem}
 .team-card select,.notes-form select,.notes-form textarea{
-  border:1px solid var(--line);background:#111a15;color:var(--text);border-radius:10px;padding:10px
+  border:1px solid var(--line);background:#fff;color:var(--text);border-radius:10px;padding:10px
 }
 .notes-card{max-height:88vh;display:flex;flex-direction:column}
 .notes-list{display:grid;gap:8px;overflow:auto;max-height:45vh;padding-right:2px;margin-bottom:12px}
-.note-row{background:#111a15;border:1px solid var(--line);border-radius:12px;padding:10px}
+.note-row{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px}
 .note-row p{margin:7px 0 0;line-height:1.4;white-space:pre-wrap}
-.note-meta{display:flex;justify-content:space-between;gap:10px;color:#91a697;font-size:.66rem;font-weight:800}
+.note-meta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:.66rem;font-weight:800}
 .notes-form label{display:grid;gap:6px}
 .notes-form textarea{width:100%;min-height:92px;resize:vertical}
 @media(max-width:620px){
