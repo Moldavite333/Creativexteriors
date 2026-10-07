@@ -1,6 +1,6 @@
 const agroStyles = document.createElement('link');
 agroStyles.rel = 'stylesheet';
-agroStyles.href = 'agro.css?v=20261007-02';
+agroStyles.href = 'agro.css?v=20261007-light01';
 document.head.appendChild(agroStyles);
 
 state.activeAgroAssignment = null;
