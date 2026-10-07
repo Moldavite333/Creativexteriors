@@ -28,6 +28,8 @@
 
     <nav class="module-tabs" aria-label="Operations modules">
       <button class="module-tab active" data-tab="fall-cutbacks" type="button">Fall Cutbacks</button>
+      <button class="module-tab" data-tab="maintenance" type="button">Maintenance</button>
+      <button class="module-tab" data-tab="color" type="button">Color</button>
       <button class="module-tab" data-tab="pruning" type="button">Pruning</button>
       <button class="module-tab" data-tab="organics" type="button">Organics</button>
       <button class="module-tab" data-tab="native-mows" type="button">Native Mows</button>
@@ -44,13 +46,13 @@
         <div class="completion-history-head"><div><span class="summary-label">Completion History</span><strong>Done</strong></div><button id="toggleHistoryBtn" class="text-btn" type="button">Show history</button></div>
         <div class="completion-tallies">
           <div class="completion-tally"><span class="tally-label">Perennials</span><strong id="perennialCompleteCount">0</strong></div>
-          <div class="completion-tally"><span class="tally-label">Annuals</span><strong id="annualCompleteCount">0</strong></div>
+          <div class="completion-tally" hidden><span class="tally-label">Annuals</span><strong id="annualCompleteCount">0</strong></div>
           <div class="completion-tally"><span class="tally-label">Roses</span><strong id="roseCompleteCount">0</strong></div>
           <div class="completion-tally full"><span class="tally-label">Fully Complete</span><strong id="completionHistoryCount">0</strong></div>
         </div>
         <div id="completionHistoryList" class="completion-history-list" hidden>
           <div class="history-section"><h3>Perennials</h3><div id="perennialHistoryList"></div></div>
-          <div class="history-section"><h3>Annuals</h3><div id="annualHistoryList"></div></div>
+          <div class="history-section" hidden><h3>Annuals</h3><div id="annualHistoryList"></div></div>
           <div class="history-section"><h3>Roses</h3><div id="roseHistoryList"></div></div>
           <div class="history-section"><h3>Fully Complete</h3><div id="fullHistoryList"></div></div>
         </div>
@@ -58,6 +60,18 @@
       <section class="controls"><input id="searchInput" type="search" placeholder="Search accounts…" autocomplete="off" /><select id="filterSelect" aria-label="Filter accounts"><option value="all">All</option><option value="active">Active</option><option value="complete">Complete</option></select></section>
       <section id="emptyState" class="empty-state"><h2>No accounts yet</h2><p>Add the first property and start tracking fall cutbacks.</p><button id="emptyAddBtn" class="primary-btn" type="button">Add Account</button></section>
       <section id="accountsList" class="accounts-list" aria-live="polite"></section>
+    </section>
+
+    <section class="module-panel" data-panel="maintenance"><div class="coming-soon"><p class="eyebrow">MODULE</p><h2>Maintenance</h2><p>Ready for maintenance services and property-specific work later.</p></div></section>
+
+    <section class="module-panel" data-panel="color">
+      <div class="module-heading"><div><p class="eyebrow">SEASONAL COLOR</p><h2>Color</h2></div></div>
+      <section class="summary-card" aria-label="Annual pull progress">
+        <div class="summary-row"><div><span class="summary-label">Annual Pull Progress</span><strong id="colorOverallPercent">0%</strong></div><div class="summary-counts"><span><b id="colorCompleteCount">0</b> complete</span><span><b id="colorAccountCount">0</b> properties</span></div></div>
+        <div class="progress-track" aria-hidden="true"><div id="colorOverallBar" class="progress-fill" style="width:0%"></div></div>
+      </section>
+      <section class="controls"><input id="colorSearchInput" type="search" placeholder="Search color accounts…" autocomplete="off" /><select id="colorFilterSelect" aria-label="Filter color accounts"><option value="all">All</option><option value="active">Active</option><option value="complete">Complete</option><option value="na">N/A</option></select></section>
+      <section id="colorAccountsList" class="accounts-list" aria-live="polite"></section>
     </section>
 
     <section class="module-panel" data-panel="pruning"><div class="coming-soon"><p class="eyebrow">MODULE</p><h2>Pruning</h2><p>Ready to build when you are.</p></div></section>
@@ -74,7 +88,7 @@
       <p class="dialog-copy">Uncheck anything this property does not have. N/A tasks will not count against completion.</p>
       <div class="task-checkboxes">
         <label><input id="taskPerennials" type="checkbox" value="perennials" /> <span>Perennials</span></label>
-        <label><input id="taskAnnuals" type="checkbox" value="annuals" /> <span>Annuals</span></label>
+        <label hidden><input id="taskAnnuals" type="checkbox" value="annuals" /> <span>Annuals</span></label>
         <label><input id="taskRoses" type="checkbox" value="roses" /> <span>Roses</span></label>
       </div>
       <p id="taskFormMessage" class="auth-message" role="status"></p>
@@ -97,5 +111,6 @@
   <script src="app.js?v=20261005-1448"></script>
   <script src="applicability.js?v=20261005-1503"></script>
   <script src="roles.js?v=20261007-01"></script>
+  <script src="modules.js?v=20261007-01"></script>
 </body>
 </html>
