@@ -1,24 +1,45 @@
 const agroStyles = document.createElement('link');
 agroStyles.rel = 'stylesheet';
-agroStyles.href = 'agro.css?v=20261007-01';
+agroStyles.href = 'agro.css?v=20261007-02';
 document.head.appendChild(agroStyles);
 
-state.activeFertilizationApplication = null;
+state.activeAgroAssignment = null;
+
+const AGRO_TRACKERS = {
+  fertilization: {
+    label: 'Fertilization',
+    stateKey: 'fertilizationApplications',
+    table: 'fertilization_applications',
+    roundField: 'application_number',
+    rounds: 4,
+    containerId: 'fertilizationRounds'
+  },
+  aeration: {
+    label: 'Aeration',
+    stateKey: 'aerationRounds',
+    table: 'aeration_rounds',
+    roundField: 'round_number',
+    rounds: 2,
+    containerId: 'aerationRounds'
+  }
+};
 
 Object.assign(els, {
-  fertilizationApplications: document.getElementById('fertilizationApplications'),
-  fertilizationManageDialog: null,
-  fertilizationManageTitle: null,
-  fertilizationAccountChoices: null,
-  fertilizationManageForm: null,
-  fertilizationManageMessage: null,
-  fertilizationManageClose: null
+  fertilizationRounds: document.getElementById('fertilizationRounds'),
+  aerationRounds: document.getElementById('aerationRounds'),
+  agroManageDialog: null,
+  agroManageTitle: null,
+  agroManageCopy: null,
+  agroAccountChoices: null,
+  agroManageForm: null,
+  agroManageMessage: null,
+  agroManageClose: null
 });
 
-function fertilizationRows(applicationNumber) {
+function agroTrackerRows(config, roundNumber) {
   const accountMap = new Map(state.accounts.map(account => [account.id, account]));
-  return (state.fertilizationApplications || [])
-    .filter(row => Number(row.application_number) === Number(applicationNumber))
+  return (state[config.stateKey] || [])
+    .filter(row => Number(row[config.roundField]) === Number(roundNumber))
     .map(row => ({ ...row, account: accountMap.get(row.account_id) }))
     .filter(row => row.account)
     .sort((a, b) =>
@@ -27,46 +48,47 @@ function fertilizationRows(applicationNumber) {
     );
 }
 
-function fertilizationProgress(applicationNumber) {
-  const rows = fertilizationRows(applicationNumber);
+function agroTrackerProgress(config, roundNumber) {
+  const rows = agroTrackerRows(config, roundNumber);
   const completed = rows.filter(row => row.completed).length;
   return { rows, completed, total: rows.length };
 }
 
-function fertilizationApplicationCard(applicationNumber) {
-  const { rows, completed, total } = fertilizationProgress(applicationNumber);
-  const card = document.createElement('article');
-  card.className = 'fert-application-card';
-
+function agroRoundCard(type, roundNumber) {
+  const config = AGRO_TRACKERS[type];
+  const { rows, completed, total } = agroTrackerProgress(config, roundNumber);
   const percent = total ? Math.round((completed / total) * 100) : 0;
+
+  const card = document.createElement('article');
+  card.className = 'agro-round-card';
   card.innerHTML = `
-    <div class="fert-application-head">
+    <div class="agro-round-head">
       <div>
-        <p class="eyebrow">FERTILIZATION ROUND</p>
-        <h4>Application ${applicationNumber}</h4>
-        <span class="fert-application-count">${completed} of ${total} complete</span>
+        <p class="eyebrow">${escapeHtml(config.label.toUpperCase())}</p>
+        <h4>Round ${roundNumber}</h4>
+        <span class="agro-round-count">${completed} of ${total} complete</span>
       </div>
-      <div class="fert-application-actions"></div>
+      <div class="agro-round-actions"></div>
     </div>
     <div class="mini-progress" aria-hidden="true">
       <div class="mini-progress-fill" style="width:${percent}%"></div>
     </div>
-    <div class="fert-account-list"></div>
+    <div class="agro-account-list"></div>
   `;
 
-  const actions = card.querySelector('.fert-application-actions');
+  const actions = card.querySelector('.agro-round-actions');
   if (typeof canManageAll === 'function' && canManageAll()) {
     const manageButton = document.createElement('button');
     manageButton.type = 'button';
-    manageButton.className = 'secondary-btn fert-manage-btn';
+    manageButton.className = 'secondary-btn agro-manage-btn';
     manageButton.textContent = 'Add / Remove Accounts';
-    manageButton.addEventListener('click', () => openFertilizationManager(applicationNumber));
+    manageButton.addEventListener('click', () => openAgroRoundManager(type, roundNumber));
     actions.appendChild(manageButton);
   }
 
-  const list = card.querySelector('.fert-account-list');
+  const list = card.querySelector('.agro-account-list');
   if (!rows.length) {
-    list.innerHTML = '<div class="history-empty">No accounts added to this application yet.</div>';
+    list.innerHTML = `<div class="history-empty">No accounts added to ${escapeHtml(config.label)} Round ${roundNumber} yet.</div>`;
     return card;
   }
 
@@ -76,40 +98,54 @@ function fertilizationApplicationCard(applicationNumber) {
       : true;
 
     const item = document.createElement('label');
-    item.className = 'fert-account-row';
+    item.className = 'agro-account-row';
     item.classList.toggle('complete', !!row.completed);
     item.innerHTML = `
       <input type="checkbox" ${row.completed ? 'checked' : ''} ${writable ? '' : 'disabled'} />
-      <span class="fert-account-name">${escapeHtml(row.account.name)}</span>
-      <span class="fert-account-status">${row.completed ? (row.completed_at ? 'Done · ' + formatDate(row.completed_at) : 'Done') : 'Open'}</span>
+      <span class="agro-account-name">${escapeHtml(row.account.name)}</span>
+      <span class="agro-account-status">${row.completed
+        ? (row.completed_at ? 'Done · ' + formatDate(row.completed_at) : 'Done')
+        : 'Open'}</span>
     `;
 
-    const checkbox = item.querySelector('input');
-    checkbox.addEventListener('change', () => setFertilizationDone(row, checkbox.checked));
+    item.querySelector('input').addEventListener('change', event => {
+      setAgroRoundDone(type, row, event.target.checked);
+    });
+
     list.appendChild(item);
   });
 
   return card;
 }
 
-function renderFertilization() {
-  if (!els.fertilizationApplications) return;
-  els.fertilizationApplications.innerHTML = '';
-  [1, 2, 3, 4].forEach(applicationNumber => {
-    els.fertilizationApplications.appendChild(fertilizationApplicationCard(applicationNumber));
-  });
+function renderAgroTracker(type) {
+  const config = AGRO_TRACKERS[type];
+  const container = document.getElementById(config.containerId);
+  if (!container) return;
+
+  container.innerHTML = '';
+  for (let roundNumber = 1; roundNumber <= config.rounds; roundNumber += 1) {
+    container.appendChild(agroRoundCard(type, roundNumber));
+  }
 }
 
-async function setFertilizationDone(row, completed) {
-  if (!row) return;
+function renderAgro() {
+  renderAgroTracker('fertilization');
+  renderAgroTracker('aeration');
+}
+
+async function setAgroRoundDone(type, row, completed) {
+  const config = AGRO_TRACKERS[type];
+  if (!config || !row) return;
   if (typeof canUpdateAccountUI === 'function' && !canUpdateAccountUI(row.account_id)) return;
 
-  const local = (state.fertilizationApplications || []).find(item => item.id === row.id);
+  const local = (state[config.stateKey] || []).find(item => item.id === row.id);
   if (local) {
     local.completed = completed;
     local.completed_at = completed ? new Date().toISOString() : null;
   }
-  renderFertilization();
+
+  renderAgroTracker(type);
   setSyncStatus('Saving…');
 
   const updates = {
@@ -120,7 +156,7 @@ async function setFertilizationDone(row, completed) {
   };
 
   const { error } = await client
-    .from('fertilization_applications')
+    .from(config.table)
     .update(updates)
     .eq('id', row.id);
 
@@ -134,110 +170,119 @@ async function setFertilizationDone(row, completed) {
   setSyncStatus('Live sync on');
 }
 
-function ensureFertilizationManager() {
-  if (els.fertilizationManageDialog) return;
+function ensureAgroRoundManager() {
+  if (els.agroManageDialog) return;
 
   const dialog = document.createElement('dialog');
-  dialog.className = 'fert-manage-dialog';
+  dialog.className = 'agro-manage-dialog';
   dialog.innerHTML = `
-    <form id="fertilizationManageForm" class="dialog-card fert-manage-card">
+    <form id="agroManageForm" class="dialog-card agro-manage-card">
       <div class="dialog-heading">
         <div>
-          <p class="eyebrow">FERTILIZATION</p>
-          <h2 id="fertilizationManageTitle">Application</h2>
+          <p class="eyebrow">AGRO</p>
+          <h2 id="agroManageTitle">Round</h2>
         </div>
-        <button id="fertilizationManageClose" class="icon-btn" type="button" aria-label="Close">×</button>
+        <button id="agroManageClose" class="icon-btn" type="button" aria-label="Close">×</button>
       </div>
-      <p class="dialog-copy">Check every account that belongs in this fertilization application.</p>
-      <div id="fertilizationAccountChoices" class="fert-account-choices"></div>
-      <p id="fertilizationManageMessage" class="auth-message" role="status"></p>
+      <p id="agroManageCopy" class="dialog-copy">Choose the accounts for this round.</p>
+      <div id="agroAccountChoices" class="agro-account-choices"></div>
+      <p id="agroManageMessage" class="auth-message" role="status"></p>
       <button class="primary-btn wide" type="submit">Save Accounts</button>
     </form>
   `;
 
   document.body.appendChild(dialog);
-  els.fertilizationManageDialog = dialog;
-  els.fertilizationManageTitle = dialog.querySelector('#fertilizationManageTitle');
-  els.fertilizationAccountChoices = dialog.querySelector('#fertilizationAccountChoices');
-  els.fertilizationManageForm = dialog.querySelector('#fertilizationManageForm');
-  els.fertilizationManageMessage = dialog.querySelector('#fertilizationManageMessage');
-  els.fertilizationManageClose = dialog.querySelector('#fertilizationManageClose');
+  els.agroManageDialog = dialog;
+  els.agroManageTitle = dialog.querySelector('#agroManageTitle');
+  els.agroManageCopy = dialog.querySelector('#agroManageCopy');
+  els.agroAccountChoices = dialog.querySelector('#agroAccountChoices');
+  els.agroManageForm = dialog.querySelector('#agroManageForm');
+  els.agroManageMessage = dialog.querySelector('#agroManageMessage');
+  els.agroManageClose = dialog.querySelector('#agroManageClose');
 
-  els.fertilizationManageClose.addEventListener('click', () => dialog.close());
+  els.agroManageClose.addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', event => {
     if (event.target === dialog) dialog.close();
   });
-  els.fertilizationManageForm.addEventListener('submit', saveFertilizationAccounts);
+  els.agroManageForm.addEventListener('submit', saveAgroRoundAccounts);
 }
 
-function openFertilizationManager(applicationNumber) {
-  if (typeof canManageAll === 'function' && !canManageAll()) return;
-  ensureFertilizationManager();
+function openAgroRoundManager(type, roundNumber) {
+  const config = AGRO_TRACKERS[type];
+  if (!config || (typeof canManageAll === 'function' && !canManageAll())) return;
 
-  state.activeFertilizationApplication = Number(applicationNumber);
-  els.fertilizationManageTitle.textContent = `Application ${applicationNumber}`;
-  els.fertilizationManageMessage.textContent = '';
+  ensureAgroRoundManager();
+  state.activeAgroAssignment = { type, roundNumber: Number(roundNumber) };
+
+  els.agroManageTitle.textContent = `${config.label} · Round ${roundNumber}`;
+  els.agroManageCopy.textContent = `Check every account that belongs in ${config.label} Round ${roundNumber}.`;
+  els.agroManageMessage.textContent = '';
 
   const assigned = new Set(
-    (state.fertilizationApplications || [])
-      .filter(row => Number(row.application_number) === Number(applicationNumber))
+    (state[config.stateKey] || [])
+      .filter(row => Number(row[config.roundField]) === Number(roundNumber))
       .map(row => row.account_id)
   );
 
-  els.fertilizationAccountChoices.innerHTML = '';
+  els.agroAccountChoices.innerHTML = '';
   [...state.accounts]
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach(account => {
       const label = document.createElement('label');
-      label.className = 'fert-choice-row';
+      label.className = 'agro-choice-row';
       label.innerHTML = `
         <input type="checkbox" value="${account.id}" ${assigned.has(account.id) ? 'checked' : ''} />
         <span>${escapeHtml(account.name)}</span>
       `;
-      els.fertilizationAccountChoices.appendChild(label);
+      els.agroAccountChoices.appendChild(label);
     });
 
   if (!state.accounts.length) {
-    els.fertilizationAccountChoices.innerHTML = '<div class="history-empty">No accounts exist yet.</div>';
+    els.agroAccountChoices.innerHTML = '<div class="history-empty">No accounts exist yet.</div>';
   }
 
-  els.fertilizationManageDialog.showModal();
+  els.agroManageDialog.showModal();
 }
 
-async function saveFertilizationAccounts(event) {
+async function saveAgroRoundAccounts(event) {
   event.preventDefault();
   if (typeof canManageAll === 'function' && !canManageAll()) return;
 
-  const applicationNumber = Number(state.activeFertilizationApplication);
-  if (![1, 2, 3, 4].includes(applicationNumber)) return;
+  const assignment = state.activeAgroAssignment;
+  const config = assignment ? AGRO_TRACKERS[assignment.type] : null;
+  if (!config) return;
+
+  const roundNumber = Number(assignment.roundNumber);
+  if (roundNumber < 1 || roundNumber > config.rounds) return;
 
   const selected = new Set(
-    [...els.fertilizationAccountChoices.querySelectorAll('input[type="checkbox"]:checked')]
+    [...els.agroAccountChoices.querySelectorAll('input[type="checkbox"]:checked')]
       .map(input => input.value)
   );
 
-  const currentRows = (state.fertilizationApplications || [])
-    .filter(row => Number(row.application_number) === applicationNumber);
+  const currentRows = (state[config.stateKey] || [])
+    .filter(row => Number(row[config.roundField]) === roundNumber);
   const current = new Set(currentRows.map(row => row.account_id));
 
   const toAdd = [...selected].filter(accountId => !current.has(accountId));
   const toRemove = [...current].filter(accountId => !selected.has(accountId));
 
-  els.fertilizationManageMessage.textContent = 'Saving…';
+  els.agroManageMessage.textContent = 'Saving…';
   setSyncStatus('Saving…');
 
   if (toAdd.length) {
     const rows = toAdd.map(accountId => ({
       account_id: accountId,
-      application_number: applicationNumber,
+      [config.roundField]: roundNumber,
       completed: false,
       updated_at: new Date().toISOString(),
       updated_by: state.session.user.id
     }));
-    const { error } = await client.from('fertilization_applications').insert(rows);
+
+    const { error } = await client.from(config.table).insert(rows);
     if (error) {
       console.error(error);
-      els.fertilizationManageMessage.textContent = error.message;
+      els.agroManageMessage.textContent = error.message;
       setSyncStatus('Save failed', true);
       return;
     }
@@ -245,14 +290,14 @@ async function saveFertilizationAccounts(event) {
 
   if (toRemove.length) {
     const { error } = await client
-      .from('fertilization_applications')
+      .from(config.table)
       .delete()
-      .eq('application_number', applicationNumber)
+      .eq(config.roundField, roundNumber)
       .in('account_id', toRemove);
 
     if (error) {
       console.error(error);
-      els.fertilizationManageMessage.textContent = error.message;
+      els.agroManageMessage.textContent = error.message;
       setSyncStatus('Save failed', true);
       await loadData();
       return;
@@ -260,15 +305,15 @@ async function saveFertilizationAccounts(event) {
   }
 
   await loadData();
-  els.fertilizationManageDialog.close();
+  els.agroManageDialog.close();
 }
 
-document.querySelector('[data-tab="organics"]')?.addEventListener('click', renderFertilization);
+document.querySelector('[data-tab="organics"]')?.addEventListener('click', renderAgro);
 
 const renderWithAgro = render;
 render = function() {
   renderWithAgro();
-  renderFertilization();
+  renderAgro();
 };
 
-if (state.session) renderFertilization();
+if (state.session) renderAgro();
