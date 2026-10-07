@@ -253,6 +253,8 @@ function ensurePropertyDialog() {
     const account = state.accounts.find(item => item.id === state.activeAccountRecord.id);
     if (account && typeof openPropertyNotes === 'function') openPropertyNotes(account);
   });
+  els.propertyAddress.addEventListener('input', updatePropertyLineButtons);
+  els.propertyLinesUrl.addEventListener('input', updatePropertyLineButtons);
 }
 
 async function openPropertyRecord(accountId) {
@@ -292,9 +294,7 @@ async function openPropertyRecord(accountId) {
   ].forEach(field => field.disabled = !editable);
   els.propertyDetailsForm.querySelector('.property-save-btn').hidden = !editable;
 
-  const canRequest = typeof canUpdateAccountUI === 'function'
-    ? (canUpdateAccountUI(accountId) || state.profile?.role === 'client')
-    : true;
+  const canRequest = ['admin','manager','crew','client'].includes(state.profile?.role);
   els.propertyRequestInput.disabled = !canRequest;
   els.propertyRequestForm.querySelector('button[type="submit"]').hidden = !canRequest;
 
@@ -344,9 +344,6 @@ function updatePropertyLineButtons() {
   els.propertyCopyAddressBtn.disabled = !address;
   els.propertyLinesFindBtn.disabled = !address;
 }
-
-els.propertyAddress?.addEventListener?.('input', updatePropertyLineButtons);
-els.propertyLinesUrl?.addEventListener?.('input', updatePropertyLineButtons);
 
 function openSavedPropertyLines() {
   const url = els.propertyLinesUrl.value.trim();
