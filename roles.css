@@ -1,10 +1,10 @@
 .role-badge{
-  display:inline-block;margin:5px 0 0 8px;padding:3px 7px;border:1px solid #c2d0c4;border-radius:999px;
-  color:var(--green-dark);font-size:.64rem;font-weight:900;letter-spacing:.08em;vertical-align:middle
+  display:inline-block;margin:5px 0 0 8px;padding:3px 7px;border:1px solid #d3d3d3;border-radius:999px;
+  color:#111;font-size:.64rem;font-weight:900;letter-spacing:.08em;vertical-align:middle
 }
 .account-head-actions{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
 .edit-tasks-btn,.property-notes-btn,.task-na-btn{
-  border:1px solid var(--line);background:#f0f4ef;color:var(--green-dark);border-radius:9px;font-weight:800
+  border:1px solid var(--line);background:#f0f4ef;color:#111;border-radius:9px;font-weight:800
 }
 .edit-tasks-btn,.property-notes-btn{padding:6px 9px;font-size:.72rem}
 .task-name-actions{display:flex;align-items:center;gap:7px}
