@@ -1,0 +1,28 @@
+.agro-sections{display:grid;gap:14px;margin-top:14px}
+.agro-work-section{background:#111a15;border:1px solid var(--line);border-radius:14px;padding:14px}
+.agro-work-section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.agro-work-section h3{margin:4px 0 6px}
+.agro-work-section-copy{margin:0;color:var(--muted);line-height:1.45;font-size:.86rem}
+.fertilization-applications{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fert-application-card{border:1px solid var(--line);border-radius:13px;padding:12px;background:#0d1511}
+.fert-application-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.fert-application-head h4{margin:3px 0 3px;font-size:1.05rem}
+.fert-application-count{font-size:.72rem;color:var(--muted);font-weight:800}
+.fert-manage-btn{padding:8px 10px;font-size:.72rem}
+.fert-account-list{display:grid;gap:7px;margin-top:10px}
+.fert-account-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:#111a15;cursor:pointer}
+.fert-account-row.complete{opacity:.72}
+.fert-account-row input{width:19px;height:19px;accent-color:#9fb68e}
+.fert-account-name{font-weight:800}
+.fert-account-status{font-size:.7rem;color:var(--muted);text-align:right}
+.fert-manage-dialog{width:min(620px,calc(100% - 18px))}
+.fert-manage-card{max-height:88vh;overflow:auto}
+.fert-account-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px 0}
+.fert-choice-row{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#0d1511}
+.fert-choice-row input{width:19px;height:19px;accent-color:#9fb68e}
+@media(max-width:760px){
+  .fertilization-applications{grid-template-columns:1fr}
+  .fert-account-choices{grid-template-columns:1fr}
+  .fert-application-head{flex-direction:column}
+  .fert-manage-btn{width:100%}
+}
